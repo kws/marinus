@@ -1,0 +1,66 @@
+{
+  "contract_version": "0.1.0",
+  "backend": {
+    "platform": "linux",
+    "name": "networkmanager-dbus",
+    "backend_version": "0.1.0"
+  },
+  "interface": {
+    "id": "wlan0",
+    "driver": "example-driver"
+  },
+  "capabilities": {
+    "rssi_dbm": false,
+    "strength_percent": true,
+    "noise_dbm": false,
+    "channel_width_mhz": false,
+    "last_seen_resolution_ms": 1000
+  },
+  "scan": {
+    "status": "cached",
+    "started_at": "2026-01-01T12:00:00.000Z",
+    "completed_at": "2026-01-01T12:00:01.000Z",
+    "error": null
+  },
+  "observations": [
+    {
+      "ssid": "ExampleNet",
+      "ssid_bytes_base64": "RXhhbXBsZU5ldA==",
+      "bssid": "02:00:00:00:00:01",
+      "rssi_dbm": null,
+      "strength_percent": 70,
+      "noise_dbm": null,
+      "frequency_mhz": 5180,
+      "channel_width_mhz": null,
+      "connected": true,
+      "freshness": "unknown",
+      "last_seen_age_ms": 0
+    },
+    {
+      "ssid": "ExampleNet",
+      "ssid_bytes_base64": "RXhhbXBsZU5ldA==",
+      "bssid": "02:00:00:00:00:02",
+      "rssi_dbm": null,
+      "strength_percent": 40,
+      "noise_dbm": null,
+      "frequency_mhz": 5180,
+      "channel_width_mhz": null,
+      "connected": false,
+      "freshness": "unknown",
+      "last_seen_age_ms": 5000
+    },
+    {
+      "ssid": "",
+      "ssid_bytes_base64": "",
+      "bssid": "02:00:00:00:00:03",
+      "rssi_dbm": null,
+      "strength_percent": 25,
+      "noise_dbm": null,
+      "frequency_mhz": 5180,
+      "channel_width_mhz": null,
+      "connected": false,
+      "freshness": "unknown",
+      "last_seen_age_ms": null
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/kws/marinus/main/contracts/draft/scan.schema.json",
+  "title": "Marinus draft scan result 0.1.0",
+  "description": "Design draft; current prototypes do not conform yet. One result per interface.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "backend", "interface", "capabilities", "scan", "observations"],
+  "properties": {
+    "contract_version": {"const": "0.1.0"},
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "name", "backend_version"],
+      "properties": {
+        "platform": {"enum": ["macos", "linux", "windows", "replay"]},
+        "name": {"type": "string", "minLength": 1},
+        "backend_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "interface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "driver"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "driver": {"type": ["string", "null"]}
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rssi_dbm", "strength_percent", "noise_dbm", "channel_width_mhz", "last_seen_resolution_ms"],
+      "properties": {
+        "rssi_dbm": {"type": "boolean"},
+        "strength_percent": {"type": "boolean"},
+        "noise_dbm": {"type": "boolean"},
+        "channel_width_mhz": {"type": "boolean"},
+        "last_seen_resolution_ms": {"type": ["integer", "null"], "minimum": 1}
+      }
+    },
+    "scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "started_at", "completed_at", "error"],
+      "properties": {
+        "status": {"enum": ["completed", "cached", "failed"]},
+        "started_at": {"$ref": "#/$defs/utcTimestamp"},
+        "completed_at": {"anyOf": [{"$ref": "#/$defs/utcTimestamp"}, {"type": "null"}]},
+        "error": {"anyOf": [{"$ref": "#/$defs/error"}, {"type": "null"}]}
+      }
+    },
+    "observations": {"type": "array", "items": {"$ref": "#/$defs/observation"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"scan": {"properties": {"status": {"const": "failed"}}}}},
+      "then": {
+        "properties": {
+          "scan": {"properties": {"error": {"$ref": "#/$defs/error"}}},
+          "observations": {"maxItems": 0}
+        }
+      },
+      "else": {
+        "properties": {
+          "scan": {"properties": {"error": {"type": "null"}, "completed_at": {"$ref": "#/$defs/utcTimestamp"}}}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "utcTimestamp": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"enum": ["permission_denied", "scan_timeout", "interface_unavailable", "unsupported", "backend_error"]},
+        "message": {"type": "string", "minLength": 1}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ssid", "ssid_bytes_base64", "bssid", "rssi_dbm", "strength_percent", "noise_dbm", "frequency_mhz", "channel_width_mhz", "connected", "freshness", "last_seen_age_ms"],
+      "properties": {
+        "ssid": {"type": ["string", "null"]},
+        "ssid_bytes_base64": {"type": ["string", "null"], "contentEncoding": "base64"},
+        "bssid": {"type": ["string", "null"], "pattern": "^[0-9a-f]{2}(:[0-9a-f]{2}){5}$"},
+        "rssi_dbm": {"type": ["number", "null"], "maximum": 0},
+        "strength_percent": {"type": ["integer", "null"], "minimum": 0, "maximum": 100},
+        "noise_dbm": {"type": ["number", "null"], "maximum": 0},
+        "frequency_mhz": {"type": ["integer", "null"], "minimum": 1},
+        "channel_width_mhz": {"type": ["integer", "null"], "minimum": 1},
+        "connected": {"type": ["boolean", "null"]},
+        "freshness": {"enum": ["fresh", "cached", "unknown"]},
+        "last_seen_age_ms": {"type": ["integer", "null"], "minimum": 0}
+      }
+    }
+  }
+}

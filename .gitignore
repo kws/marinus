@@ -1,0 +1,17 @@
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.build/
+.swiftpm/
+dist/
+results/
+*.xcuserstate
+.env
+.env.*
+!.env.example
+
+# Survey captures and floor plans stay local unless deliberately added as fixtures.
+surveys/
+captures/

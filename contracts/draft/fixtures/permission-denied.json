@@ -1,0 +1,29 @@
+{
+  "contract_version": "0.1.0",
+  "backend": {
+    "platform": "linux",
+    "name": "networkmanager-dbus",
+    "backend_version": "0.1.0"
+  },
+  "interface": {
+    "id": "wlan0",
+    "driver": "example-driver"
+  },
+  "capabilities": {
+    "rssi_dbm": false,
+    "strength_percent": true,
+    "noise_dbm": false,
+    "channel_width_mhz": false,
+    "last_seen_resolution_ms": 1000
+  },
+  "scan": {
+    "status": "failed",
+    "started_at": "2026-01-01T12:00:00.000Z",
+    "completed_at": null,
+    "error": {
+      "code": "permission_denied",
+      "message": "Synthetic example: NetworkManager denied a fresh scan request."
+    }
+  },
+  "observations": []
+}

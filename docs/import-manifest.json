@@ -1,0 +1,103 @@
+{
+  "imported_at": "2026-10-07",
+  "macos_source_repository": "https://github.com/kws/macwifi",
+  "macos_source_commit": "0daedb1da835e6d05ffd4fd8e3d03306f4d541b0",
+  "linux_source": "Locally authored NetworkManager feasibility probe; no prior Git history",
+  "files": [
+    {
+      "source": "Package.swift",
+      "destination": "backends/macos/Package.swift",
+      "source_sha256": "b1af6b5ad7392963243943bd982f61fdbf41e357d21054c3d4ee614d365692bb"
+    },
+    {
+      "source": "Makefile",
+      "destination": "backends/macos/Makefile",
+      "source_sha256": "3c1ebfa349b5c8ac36944fb695133d13269f9197914d72192c4de71a7e9b7f83"
+    },
+    {
+      "source": "Sources/MacWiFiCLI/AppLauncher.swift",
+      "destination": "backends/macos/Sources/MarinusCLI/AppLauncher.swift",
+      "source_sha256": "5228fda117aa62557ebd1c022c68562d3103bca6d3429a060aee793effe603ca"
+    },
+    {
+      "source": "Sources/MacWiFiCLI/Command.swift",
+      "destination": "backends/macos/Sources/MarinusCLI/Command.swift",
+      "source_sha256": "65420f15d60ff23a877ae9c3f78cb43ade42170fc2a589e1797ef7067b2ec20f"
+    },
+    {
+      "source": "Sources/MacWiFiCLI/MacWiFiMain.swift",
+      "destination": "backends/macos/Sources/MarinusCLI/MarinusMain.swift",
+      "source_sha256": "764722f3540798ca8714fa4202621f98b57def83acf767649a40f69a8553404e"
+    },
+    {
+      "source": "Sources/MacWiFiCLI/Output.swift",
+      "destination": "backends/macos/Sources/MarinusCLI/Output.swift",
+      "source_sha256": "ab6d66b950b905b964d74ae311959ef4ab768f6901a5bbf73b775adf70a9fcf4"
+    },
+    {
+      "source": "Sources/MacWiFiCLI/WiFiScanner.swift",
+      "destination": "backends/macos/Sources/MarinusCLI/WiFiScanner.swift",
+      "source_sha256": "49865e38f6019875d8e270b963399ca9c75af81cadb91109a068b1220be52f97"
+    },
+    {
+      "source": "Tests/MacWiFiCLITests/CommandTests.swift",
+      "destination": "backends/macos/Tests/MarinusCLITests/CommandTests.swift",
+      "source_sha256": "74c6cecf8583ac3315a0eb42a74a4795a72a5fcdd47bb8dc330b4a57711d2ad0"
+    },
+    {
+      "source": "Tests/MacWiFiCLITests/LauncherTests.swift",
+      "destination": "backends/macos/Tests/MarinusCLITests/LauncherTests.swift",
+      "source_sha256": "e883867c0dae986ec473b004e7215f8a16530eaff80f5bfa75bbc1520fa9a881"
+    },
+    {
+      "source": "Tests/MacWiFiCLITests/OutputTests.swift",
+      "destination": "backends/macos/Tests/MarinusCLITests/OutputTests.swift",
+      "source_sha256": "96d313a535fe58340986a826094eab9c7d3e4541b030e8348759ddab50040456"
+    },
+    {
+      "source": "Tests/MacWiFiCLITests/ScannerTests.swift",
+      "destination": "backends/macos/Tests/MarinusCLITests/ScannerTests.swift",
+      "source_sha256": "de2d31cbf3b5fb43b9f87210dc7d65012c4c519a892b94f2e953f1969b8e3c57"
+    },
+    {
+      "source": "Tests/TestRunner.swift",
+      "destination": "backends/macos/Tests/TestRunner.swift",
+      "source_sha256": "1dbbfdbf333f13e3747e42bb80475f6faac492f8f3418beebbd31c878d169df7"
+    },
+    {
+      "source": "scripts/build-app.sh",
+      "destination": "backends/macos/scripts/build-app.sh",
+      "source_sha256": "0eda1cc3b3595f33ebaed4ee98e7802f0a9119b198c7498027e5020ac2fdc755"
+    },
+    {
+      "source": "scripts/notarize-app.sh",
+      "destination": "backends/macos/scripts/notarize-app.sh",
+      "source_sha256": "d98e4a261825c0ecaf9a0c79050d6f72e435ea4d2f2e4bf9cbae7d212835923d"
+    },
+    {
+      "source": "scripts/test.sh",
+      "destination": "backends/macos/scripts/test.sh",
+      "source_sha256": "1f0feb62b220f04298672dda05280cc70372dca5205918f16789168dc64e5a17"
+    },
+    {
+      "source": "packaging/Info.plist",
+      "destination": "backends/macos/packaging/Info.plist",
+      "source_sha256": "4ff3c5981246b783eee2b69ad5166a8726cfc7ddadb8cb7e3cc17b30b99d7080"
+    },
+    {
+      "source": "packaging/entitlements.plist",
+      "destination": "backends/macos/packaging/entitlements.plist",
+      "source_sha256": "32bddd6d006be853f15e0051e390360221806c2ac0630ceee8a52f353e97dbbf"
+    },
+    {
+      "source": "linux-poc/wifi_scan.py",
+      "destination": "backends/linux/wifi_scan.py",
+      "source_sha256": "9c727810afb7434a3014e479087fa528717764dabea19c26afb38d929d933af9"
+    },
+    {
+      "source": "linux-poc/test_wifi_scan.py",
+      "destination": "backends/linux/test_wifi_scan.py",
+      "source_sha256": "252299ca804480adccd629f40c42d0618c001c8d2bbaea42852d31bce3ec048a"
+    }
+  ]
+}

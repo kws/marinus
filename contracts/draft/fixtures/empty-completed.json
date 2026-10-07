@@ -1,0 +1,26 @@
+{
+  "contract_version": "0.1.0",
+  "backend": {
+    "platform": "macos",
+    "name": "corewlan",
+    "backend_version": "0.1.0"
+  },
+  "interface": {
+    "id": "en0",
+    "driver": null
+  },
+  "capabilities": {
+    "rssi_dbm": true,
+    "strength_percent": false,
+    "noise_dbm": true,
+    "channel_width_mhz": true,
+    "last_seen_resolution_ms": null
+  },
+  "scan": {
+    "status": "completed",
+    "started_at": "2026-01-01T12:00:00.000Z",
+    "completed_at": "2026-01-01T12:00:01.000Z",
+    "error": null
+  },
+  "observations": []
+}
