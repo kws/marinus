@@ -149,7 +149,7 @@ func launchInApp(arguments: [String], timeout: TimeInterval, bundleURL: URL? = n
         }
         Thread.sleep(forTimeInterval: 0.02)
     }
-    throw WiFiError.message("command timed out after \(timeout)s; check the macOS permission dialog")
+    throw BackendFailure(code: "scan_timeout", message: "command timed out after \(timeout)s; check the macOS permission dialog")
 }
 
 func runWorker(_ arguments: [String]) -> Int32 {

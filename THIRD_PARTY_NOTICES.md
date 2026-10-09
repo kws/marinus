@@ -34,3 +34,12 @@ target copies the runtime package's original `LICENSE.TXT` and complete
 `THIRD-PARTY-NOTICES.TXT` into `licenses/dotnet/`, alongside Marinus's license and
 the retained upstream notices. Framework-dependent builds use the host's .NET
 installation instead. Keep these distribution files with the executable.
+
+The desktop application uses Tauri and its JavaScript API, along with the Rust
+dependencies pinned in `desktop/src-tauri/Cargo.lock`. Its build stages the
+resolved platform dependencies' license metadata and supplied license/notice
+files under `notices/rust-dependencies/`, with a machine-readable inventory in
+`notices/desktop-dependencies.json`. The JavaScript API's supplied licenses are
+under `notices/tauri-javascript-api/`. This inventory includes build dependencies;
+release review must still check the resolved inventory and any packages without
+supplied full license texts. Vite, TypeScript and Vitest are development tools.

@@ -13,6 +13,10 @@ results/
 !.env.example
 backends/windows/**/bin/
 backends/windows/**/obj/
+node_modules/
+target/
+desktop/src-tauri/resources/
+desktop/src-tauri/gen/
 
 # Survey captures and floor plans stay local unless deliberately added as fixtures.
 surveys/

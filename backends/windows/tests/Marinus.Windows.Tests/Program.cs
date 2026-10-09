@@ -252,6 +252,24 @@ AsyncTest("CLI JSON output preserves the shared failure envelope and exit status
     Assert(json.RootElement.GetProperty("scan").GetProperty("error").GetProperty("code").GetString() == "permission_denied");
 });
 
+AsyncTest("Interface enumeration uses a versioned envelope and does not scan", async () =>
+{
+    var (scanner, client) = Setup();
+    var output = new StringWriter();
+    Assert(await CliRunner.RunAsync(["interfaces", "--json"], scanner, output, new StringWriter()) == 0);
+    using var json = JsonDocument.Parse(output.ToString());
+    var value = json.RootElement;
+    Assert(value.GetProperty("contract_version").GetString() == "0.1.0");
+    Assert(value.GetProperty("interfaces")[0].GetProperty("id").GetString() == id.ToString("D"));
+    Assert(value.GetProperty("error").ValueKind == JsonValueKind.Null);
+    Assert(client.Calls.SequenceEqual(["interfaces", "dispose"]));
+    if (args.Length == 2 && args[0] == "--emit-fixtures")
+    {
+        Directory.CreateDirectory(args[1]);
+        File.WriteAllText(Path.Combine(args[1], "windows-interfaces.json"), output.ToString());
+    }
+});
+
 AsyncTest("Watch emits JSON Lines and retains its initial adapter", async () =>
 {
     string directory = Path.Combine(Path.GetTempPath(), "marinus-tests-" + Guid.NewGuid());

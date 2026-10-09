@@ -1,0 +1,133 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  font-synthesis: none;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--surface);
+  --text: #252525;
+  --muted: #686868;
+  --surface: #fff;
+  --chrome: #f1f1f1;
+  --header: #f7f7f7;
+  --border: #c9c9c9;
+  --row-border: #e7e7e7;
+  --alternate: #f8f8f8;
+  --hover: #e9f1fc;
+  --control: #fff;
+  --control-hover: #f7f7f7;
+  --accent: #086cd5;
+  --signal-track: #ddd;
+  --fresh: #2e7047;
+  --cached: #90631f;
+  --error: #b3261e;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; }
+body { margin: 0; }
+#app { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+[hidden] { display: none !important; }
+button, input, select { font: inherit; color: inherit; }
+button, select, input[type="search"] {
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--control);
+}
+button { padding: 0 11px; white-space: nowrap; }
+button:not(:disabled):hover { background: var(--control-hover); border-color: var(--muted); }
+button:not(:disabled):active { background: var(--alternate); }
+button:disabled, select:disabled { opacity: .45; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; min-width: 76px; }
+button.primary:not(:disabled):hover { background: var(--accent); border-color: var(--accent); filter: brightness(1.1); }
+button:focus-visible, input:focus-visible, select:focus-visible, .table-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+select { width: 100%; min-width: 0; padding: 0 7px; }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px 12px;
+  background: var(--chrome);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+.adapter { display: flex; align-items: center; gap: 7px; flex: 0 1 340px; min-width: 140px; }
+.adapter label { flex-shrink: 0; }
+#refresh { flex-shrink: 0; width: 28px; padding: 0; font-size: 20px; line-height: 1; }
+.toolbar-divider { width: 1px; height: 22px; margin: 0 3px; background: var(--border); flex-shrink: 0; }
+.spacer { flex: 1; }
+
+.workspace { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; }
+.table-toolbar { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 6px 12px; border-bottom: 1px solid var(--border); background: var(--header); }
+input[type="search"] { width: 250px; min-width: 140px; padding: 0 8px; }
+input::placeholder { color: var(--muted); }
+.result-count { color: var(--muted); white-space: nowrap; font-size: 12px; font-variant-numeric: tabular-nums; }
+.demo-switch { display: flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12px; user-select: none; }
+.demo-switch input { margin: 0; accent-color: var(--accent); }
+
+/* This is the only scrolling region. Both toolbars and the status bar stay put. */
+.table-wrap { position: relative; min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; background: var(--surface); }
+table { width: 100%; min-width: 760px; table-layout: fixed; border-spacing: 0; text-align: left; font-size: 12px; }
+.network-column { width: auto; }
+.bssid-column { width: 158px; }
+.signal-column { width: 150px; }
+.frequency-column { width: 110px; }
+.link-column { width: 100px; }
+.freshness-column { width: 94px; }
+th { position: sticky; top: 0; z-index: 1; height: 29px; padding: 0 12px; background: var(--header); font-weight: 500; border-bottom: 1px solid var(--border); border-right: 1px solid var(--row-border); user-select: none; }
+th:last-child { border-right: 0; }
+td { height: 29px; padding: 5px 12px; border-bottom: 1px solid var(--row-border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+tbody tr:nth-child(even) { background: var(--alternate); }
+tbody tr:hover { background: var(--hover); }
+.bssid { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 11px; color: var(--muted); }
+.signal { display: flex; align-items: center; gap: 8px; }
+.signal-bar { display: block; flex-shrink: 0; width: 44px; height: 6px; overflow: hidden; background: var(--signal-track); }
+.signal-bar i { display: block; height: 100%; background: var(--accent); }
+.freshness { text-transform: capitalize; color: var(--muted); }
+.freshness.fresh { color: var(--fresh); }
+.freshness.cached { color: var(--cached); }
+.empty { position: sticky; left: 0; width: 100%; padding: 36px 16px; text-align: center; color: var(--muted); font-size: 12px; }
+
+.statusbar { display: flex; align-items: center; gap: 16px; min-width: 0; height: 28px; padding: 0 12px; background: var(--chrome); border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+#status { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#status.error { color: var(--error); }
+#strongest, #scan-time { white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .adapter { flex-basis: 270px; }
+  #scan-time { display: none; }
+}
+@media (max-width: 700px) {
+  .toolbar { flex-wrap: wrap; gap: 6px; padding: 7px 8px; }
+  .adapter { flex: 1 1 calc(100% - 22px); }
+  .toolbar-divider { display: none; }
+  .table-toolbar { gap: 8px; padding: 6px 8px; flex-wrap: wrap; }
+  input[type="search"] { flex: 1; width: 180px; }
+  .result-count { order: 1; width: 100%; }
+  .result-count:empty { display: none; }
+  .statusbar { padding: 0 8px; }
+  #strongest { display: none; }
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #e5e5e5;
+    --muted: #aaa;
+    --surface: #202020;
+    --chrome: #2e2e2e;
+    --header: #292929;
+    --border: #505050;
+    --row-border: #363636;
+    --alternate: #252525;
+    --hover: #293e57;
+    --control: #383838;
+    --control-hover: #424242;
+    --accent: #1678e3;
+    --signal-track: #4b4b4b;
+    --fresh: #8ac69e;
+    --cached: #deb56f;
+    --error: #ff9b94;
+  }
+}

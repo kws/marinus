@@ -1,4 +1,4 @@
-.PHONY: build build-macos test test-linux test-macos test-windows test-contracts check check-macos clean
+.PHONY: build build-macos test test-linux test-macos test-windows test-contracts test-desktop check check-macos clean
 
 PYTHON ?= python3
 
@@ -11,10 +11,12 @@ test: test-linux test-contracts
 	@if [ "$$(uname -s)" = Darwin ]; then $(MAKE) test-macos; fi
 
 test-linux:
-	$(PYTHON) -m unittest discover -s backends/linux -v
+	MARINUS_LINUX_FIXTURE_DIR="$(CURDIR)/backends/linux/results/fixtures" $(PYTHON) -m unittest discover -s backends/linux -v
+	$(PYTHON) scripts/check-contracts.py backends/linux/results/fixtures
 
 test-macos:
-	$(MAKE) -C backends/macos test
+	MARINUS_FIXTURE_DIR="$(CURDIR)/backends/macos/results/fixtures" $(MAKE) -C backends/macos test
+	$(PYTHON) scripts/check-contracts.py backends/macos/results/fixtures
 
 test-windows:
 	dotnet run --project backends/windows/tests/Marinus.Windows.Tests -c Release -- --emit-fixtures backends/windows/results/fixtures
@@ -23,11 +25,16 @@ test-windows:
 test-contracts:
 	$(PYTHON) scripts/check-contracts.py
 
+test-desktop:
+	cd desktop && npm test && npm run build
+	cd desktop && cargo test --locked --manifest-path src-tauri/Cargo.toml
+
 check: test-linux test-contracts
 	@if [ "$$(uname -s)" = Darwin ]; then $(MAKE) check-macos; fi
 
 check-macos:
-	$(MAKE) -C backends/macos check
+	MARINUS_FIXTURE_DIR="$(CURDIR)/backends/macos/results/fixtures" $(MAKE) -C backends/macos check
+	$(PYTHON) scripts/check-contracts.py backends/macos/results/fixtures
 
 clean:
 	$(MAKE) -C backends/macos clean

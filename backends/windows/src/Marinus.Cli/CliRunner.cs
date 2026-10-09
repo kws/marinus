@@ -31,8 +31,16 @@ public static class CliRunner
             if (command.Name == "help") { output.WriteLine(Help); return 0; }
             if (command.Name == "interfaces")
             {
-                var interfaces = scanner.GetInterfaces();
-                if (command.Json) output.WriteLine(ContractJson.Serialize(interfaces, true));
+                IReadOnlyList<WirelessInterface> interfaces;
+                try { interfaces = scanner.GetInterfaces(); }
+                catch (Exception exception) when (command.Json && exception is WlanException or PlatformNotSupportedException)
+                {
+                    string code = exception is WlanException wlan ? wlan.ContractCode : "unsupported";
+                    output.WriteLine(ContractJson.Serialize(new InterfaceResult("0.1.0", new BackendInfo(), [], new ScanError(code, exception.Message)), true));
+                    return 1;
+                }
+                if (command.Json) output.WriteLine(ContractJson.Serialize(new InterfaceResult("0.1.0", new BackendInfo(),
+                    interfaces.Select(item => new InterfaceInfo(item.Id.ToString("D"), item.Description, null, item.State)).ToArray()), true));
                 else
                 {
                     output.WriteLine("INTERFACE GUID                         STATE           ADAPTER");

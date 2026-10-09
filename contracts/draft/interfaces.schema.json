@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/kws/marinus/main/contracts/draft/interfaces.schema.json",
+  "title": "Marinus draft interface enumeration 0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "backend",
+    "interfaces",
+    "error"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "0.1.0"
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "name",
+        "backend_version"
+      ],
+      "properties": {
+        "platform": {
+          "enum": [
+            "macos",
+            "linux",
+            "windows",
+            "replay"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backend_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "driver",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "driver": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message"
+          ],
+          "properties": {
+            "code": {
+              "enum": [
+                "permission_denied",
+                "scan_timeout",
+                "interface_unavailable",
+                "unsupported",
+                "backend_error"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "error": {
+            "type": "object"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "interfaces": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}

@@ -42,13 +42,25 @@ func executeCommand(
     _ command: CLICommand,
     version: String,
     scan: (ScanMode) throws -> [WiFiNetwork] = scanNetworks,
-    password: (String) throws -> String = keychainPassword
+    password: (String) throws -> String = keychainPassword,
+    surveyScan: (CLICommand) -> [String: Any] = scanContract
 ) -> CommandResult {
     do {
         switch command.kind {
         case .help: return CommandResult(stdout: usage)
         case .version: return CommandResult(stdout: "marinus \(version)\n")
+        case .interfaces:
+            let value = macInterfaces()
+            let items = value["interfaces"] as? [[String: Any]] ?? []
+            return CommandResult(stdout: command.asJSON ? try contractJSON(value) : "INTERFACE\n" + items.map { $0["id"] as! String }.joined(separator: "\n") + "\n")
+        case .watch:
+            return CommandResult(stderr: "watch is run by the CLI coordinator\n", exitCode: 2)
         case .scan:
+            if !command.legacy {
+                let value = surveyScan(command)
+                let failed = (value["scan"] as? [String: Any])?["status"] as? String == "failed"
+                return CommandResult(stdout: command.asJSON ? try contractJSON(value) : contractTable(value), exitCode: failed ? 1 : 0)
+            }
             let networks = try scan(command.scanMode)
             // Foundation pretty-prints an empty array across multiple lines;
             // retain the original CLI's empty-list output.

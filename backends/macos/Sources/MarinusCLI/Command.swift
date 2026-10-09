@@ -1,6 +1,6 @@
 import Foundation
 
-enum CommandKind: String { case scan, info, password, help, version }
+enum CommandKind: String { case scan, watch, interfaces, info, password, help, version }
 
 struct CLICommand: Equatable {
     var kind: CommandKind
@@ -9,8 +9,14 @@ struct CLICommand: Equatable {
     var noPromptHint = false
     var timeout: TimeInterval = 90
     var ssid: String?
+    var legacy = false
+    var cached = false
+    var interfaceID: String?
+    var interval: TimeInterval = 5
+    var count: Int?
+    var output: String?
 
-    var needsApp: Bool { kind == .scan || kind == .info || kind == .password }
+    var needsApp: Bool { kind == .scan || kind == .watch || kind == .info || kind == .password }
     var scanMode: ScanMode { allBSSIDs ? .bssids : .summary }
 }
 
@@ -29,22 +35,31 @@ Usage:
 
 Commands:
   scan              List nearby Wi-Fi networks.
+  interfaces        List Wi-Fi interfaces without scanning.
+  watch             Repeat scans; --json emits JSON Lines.
   info              Show the current network.
   password <ssid>   Print a saved Keychain password.
   help              Show this message.
   version           Print version information.
 
 Flags:
-  --json            Emit JSON instead of a table (scan, info, password).
-  --bssids          Show every observed BSSID; C matches the connected BSSID
-                    (scan, info). Default: strongest result per SSID.
+  --json            Emit the shared 0.1.0 contract (scan, watch, interfaces).
+  --interface <id>  Select a Wi-Fi device, e.g. en0 (scan, watch).
+  --cached          Explicitly read cached results (scan).
+  --legacy          Original macOS scan format and SSID summary (scan).
+  --interval <sec>  Pause after each watch scan; default 5 seconds.
+  --count <n>       Stop watch after n scans.
+  --output <file>   Save JSON/JSON Lines to a new file (scan, watch).
+  --bssids          Legacy scan/info: retain every observed BSSID instead of
+                    the strongest result per SSID. Survey scans always retain all BSSIDs.
   --no-prompt-hint  Suppress the Keychain prompt hint (password).
   --timeout <time>  Maximum command duration, e.g. 60s or 2m.
                     Default: 90s for scanning, 60s for passwords.
 
 Examples:
   marinus scan
-  marinus scan --bssids --json
+  marinus scan --json
+  marinus watch --count 10 --json
   marinus info --bssids
   marinus password "MyHomeWiFi" --json
 
@@ -107,8 +122,34 @@ func parseCommand(_ arguments: [String]) throws -> CLICommand {
             }
         }
         switch flag {
-        case "--json" where command.needsApp:
+        case "--json" where command.needsApp || kind == .interfaces:
             command.asJSON = try booleanValue()
+        case "--legacy" where kind == .scan:
+            command.legacy = try booleanValue()
+        case "--cached" where kind == .scan:
+            command.cached = try booleanValue()
+        case "--interface", "--output", "--interval", "--count":
+            guard kind == .scan || kind == .watch else { throw CLIParseError.usage("\(flag) requires scan or watch") }
+            let text: String
+            if let value { text = value }
+            else {
+                guard index < arguments.count else { throw CLIParseError.usage("\(flag) requires a value") }
+                text = arguments[index]; index += 1
+            }
+            guard !text.isEmpty else { throw CLIParseError.usage("\(flag) requires a value") }
+            switch flag {
+            case "--interface": command.interfaceID = text
+            case "--output": command.output = text
+            case "--interval" where kind == .watch:
+                guard let seconds = Double(text), seconds.isFinite, seconds >= 1, seconds <= 86400 else {
+                    throw CLIParseError.usage("--interval needs 1..86400 seconds")
+                }
+                command.interval = seconds
+            case "--count" where kind == .watch:
+                guard let count = Int(text), count > 0 else { throw CLIParseError.usage("--count needs a positive integer") }
+                command.count = count
+            default: throw CLIParseError.usage("\(flag) is only supported by watch")
+            }
         case "--bssids" where kind == .scan || kind == .info:
             command.allBSSIDs = try booleanValue()
         case "--no-prompt-hint" where kind == .password:
@@ -123,13 +164,16 @@ func parseCommand(_ arguments: [String]) throws -> CLICommand {
                 durationText = arguments[index]
                 index += 1
             }
-            guard let duration = parseDuration(durationText) else {
+            guard let duration = parseDuration(durationText) ?? Double(durationText), duration.isFinite, duration > 0 else {
                 throw CLIParseError.usage("invalid timeout \(durationText); use a positive duration such as 60s")
             }
             command.timeout = duration
         default:
             throw CLIParseError.usage("unknown flag for \(kind.rawValue): \(argument)")
         }
+    }
+    if command.legacy && (command.cached || command.interfaceID != nil || command.output != nil) {
+        throw CLIParseError.usage("--legacy cannot be combined with --cached, --interface or --output")
     }
     if kind == .password {
         guard positionals.count == 1 else {
