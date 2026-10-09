@@ -3,7 +3,9 @@
 The initial pipeline supports a macOS CLI PKG and desktop DMG, Windows CLI and
 desktop NSIS setup EXEs, and Linux CLI/desktop DEBs. These are development
 packaging foundations. Signed distribution, installed permissions, upgrades and
-uninstall behavior need verification before a public release. No binaries are
+uninstall behavior need verification before a public release. GitHub Actions
+retains development installers for testing for 30 days; see
+[download and testing instructions](test-builds.md). GitHub Releases are not
 published automatically.
 
 ## macOS

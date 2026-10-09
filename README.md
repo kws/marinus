@@ -87,7 +87,8 @@ npm run desktop:dev
 
 Requires the platform build tools and Rust/Node; see the [desktop guide](desktop/README.md).
 `npm run dev` provides a browser preview using a labeled synthetic demo.
-Build development installers with [the packaging guide](docs/packaging.md).
+Download CI installers using [the test-build guide](docs/test-builds.md), or build
+development installers with [the packaging guide](docs/packaging.md).
 Public signing requires release credentials and installed-platform validation.
 
 ## Development
