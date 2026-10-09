@@ -10,16 +10,17 @@ contract version each backend advertises.
 ```text
 backends/macos/    Swift scanner, CLI, app packaging and tests
 backends/linux/    NetworkManager scanner, Python entry points and tests
-backends/windows/ Planned Native WLAN implementation
+backends/windows/ C# Native WLAN library, CLI, publishing and synthetic tests
 contracts/        Draft schema, behavior specification and synthetic fixtures
 heatmaps/         Planned shared survey/heatmap core
 docs/             Architecture, roadmap and import provenance
 licenses/         Complete upstream license notices
 ```
 
-The initial prototypes keep their existing formats. The draft contract is a
-design target, not an implemented compatibility promise. Once adapters conform,
-the CLI and library should expose the same scan object. Format validation alone
+The macOS and Linux prototypes keep their existing formats. Windows exposes
+the draft contract through its library and CLI. The draft remains subject to
+change; once all adapters conform, the CLI and library should expose the same
+scan object. Format validation alone
 cannot prove that a scan completed, a reading is fresh or a unit has the intended
 meaning; backend behavior needs conformance tests as well.
 
@@ -46,8 +47,10 @@ service and PolicyKit authorization. The optional diagnostic sudo path elevates
 only a fixed scan request, not the collector. Do not install a setuid collector
 or automatic policy bypass as part of normal builds.
 
-The Windows backend is planned around Native WLAN scan notifications and BSS
-results. Its consent/permissions and error behavior need hardware validation.
+The Windows backend uses Native WLAN scan notifications and BSS results. It
+retains native RSSI, link quality and raw SSID bytes, and uses host receive
+timestamps for observation age/freshness. Its watch command exports JSON Lines
+for repeated measurements; consent/permissions still require hardware checks.
 A replay backend is also planned so downstream tools can develop without radios.
 
 ## Survey and heatmap responsibilities

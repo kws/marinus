@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a Windows Native WLAN library and CLI with fresh/cached scans, interface
+  selection, native RSSI and raw identifiers, draft-contract JSON, repeated
+  measurements and JSON Lines export. Add synthetic behavior/schema tests and
+  a Windows CI/publishing job.
 - Start Marinus with a fresh Git history and MIT licensing, retaining both
   original macwifi and macwifi-cli notices and import provenance.
 - Import and rename the Swift macOS scan/diagnostic prototype and its tests.

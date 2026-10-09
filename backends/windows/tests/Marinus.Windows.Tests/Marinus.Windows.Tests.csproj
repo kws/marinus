@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Marinus.Windows/Marinus.Windows.csproj" />
+    <ProjectReference Include="../../src/Marinus.Cli/Marinus.Cli.csproj" />
+  </ItemGroup>
+</Project>

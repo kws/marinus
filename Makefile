@@ -1,4 +1,4 @@
-.PHONY: build build-macos test test-linux test-macos test-contracts check check-macos clean
+.PHONY: build build-macos test test-linux test-macos test-windows test-contracts check check-macos clean
 
 PYTHON ?= python3
 
@@ -15,6 +15,10 @@ test-linux:
 
 test-macos:
 	$(MAKE) -C backends/macos test
+
+test-windows:
+	dotnet run --project backends/windows/tests/Marinus.Windows.Tests -c Release -- --emit-fixtures backends/windows/results/fixtures
+	$(PYTHON) scripts/check-contracts.py backends/windows/results/fixtures
 
 test-contracts:
 	$(PYTHON) scripts/check-contracts.py

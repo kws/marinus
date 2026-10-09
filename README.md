@@ -9,22 +9,23 @@ data that applications can consume on macOS, Linux and Windows.
 
 ## Current state
 
-This is the initial development repository. It contains two functioning scan
-prototypes; their command interfaces and JSON output are **not yet unified**.
-The shared library API, Windows backend and heatmap engine are planned work.
+This repository contains functioning macOS, Linux and Windows scanners. Their
+command interfaces and JSON output are **not yet unified**: Windows implements
+the draft shared contract, while macOS and Linux retain their prototype formats.
+The cross-platform shared library API and heatmap engine are planned work.
 
 | Component | Status | Implementation |
 | --- | --- | --- |
 | macOS scanning | Imported prototype; macOS 13+ | Swift, CoreWLAN and a signed app bundle |
 | Linux scanning | Prototype tested on Pop!_OS 22.04 | Python, NetworkManager and system D-Bus |
-| Windows scanning | Planned | Native WLAN API |
-| Shared scan contract | Draft; neither prototype conforms yet | JSON Schema and synthetic examples |
+| Windows scanning | Initial CLI and C# library; scan, cache and watch | .NET 10 and Native WLAN API |
+| Shared scan contract | Draft; implemented by Windows | JSON Schema and synthetic examples |
 | Heatmap engine | Planned core component | Survey samples, coordinates and interpolation |
 
-macOS currently reports RSSI in dBm. Linux preserves NetworkManager's native
-signal percentage. Both are useful for relative coverage; they are not assumed
-to be calibrated to each other. Preserve the original units and use a consistent
-scale throughout a survey.
+macOS and Windows report native RSSI in dBm. Linux preserves NetworkManager's
+native signal percentage. These are useful for relative coverage; they are not
+assumed to be calibrated to each other. Preserve the original units and use a
+consistent scale throughout a survey.
 
 ## Try the prototypes
 
@@ -59,6 +60,21 @@ Replace `wlan0` with your interface. Fresh scan authorization uses the existing
 NetworkManager/PolicyKit policy. The [Linux guide](backends/linux/README.md)
 documents permissions, freshness and an explicit diagnostic sudo option.
 
+### Windows
+
+Build with the .NET 10 SDK, then run the self-contained CLI from normal PowerShell:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File backends/windows/scripts/build.ps1
+.\backends\windows\dist\marinus.exe scan
+.\backends\windows\dist\marinus.exe scan --json
+.\backends\windows\dist\marinus.exe watch --count 10 --output .\captures\walk.jsonl
+```
+
+Allow Windows location access when prompted. The [Windows guide](backends/windows/README.md)
+covers interface selection, permissions, cached reads, JSON Lines export and the
+C# library. Heatmap rendering and survey positions are future work.
+
 ## Development
 
 ```sh
@@ -72,7 +88,10 @@ make check
 Tests use synthetic observations; they do not scan nearby networks or access
 the Keychain. On macOS, `make check` also builds and verifies the app and tests
 a LaunchServices round trip without requesting radio or Keychain permissions.
-GitHub Actions checks the prototypes and draft fixtures on Linux and macOS.
+With the .NET 10 SDK installed, `make test-windows` also checks the Windows
+library/CLI and generated contract output on macOS/Linux. Windows has a
+PowerShell test script in its backend guide. GitHub Actions checks all three
+backends and draft fixtures; synthetic tests do not require Wi-Fi hardware.
 
 Start with the [architecture](docs/architecture.md),
 [draft contract](contracts/README.md), [roadmap](docs/roadmap.md), and

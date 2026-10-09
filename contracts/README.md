@@ -1,8 +1,10 @@
 # Draft shared scan contract
 
-**Status: design draft, version 0.1.0. Neither backend prototype conforms yet.**
-The schema and fixtures define a starting point for discussion and adapters;
-passing fixture validation is not a claim of platform conformance.
+**Status: design draft, version 0.1.0. Windows implements this format; the macOS
+and Linux prototypes retain their earlier formats.** The schema and fixtures
+define a starting point for discussion and adapters. Windows has synthetic
+behavior tests as well as generated-output schema validation; passing schema
+validation alone is not a claim of platform conformance.
 
 The draft [scan schema](draft/scan.schema.json) defines one result per interface.
 Examples in [draft/fixtures](draft/fixtures/) are entirely synthetic, including
@@ -49,7 +51,7 @@ details can be included in the error message without exposing credentials.
 
 The schema constrains shape, ranges and the failure envelope. The validation
 script also checks fixtures against advertised capabilities and cached-mode
-freshness. Future backend conformance tests must exercise actual request/wait,
+freshness. Backend conformance tests must exercise actual request/wait,
 permissions, timing and native-field mapping with controlled backend inputs.
 
 ## Compatibility and next decisions
