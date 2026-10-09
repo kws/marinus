@@ -10,10 +10,11 @@ This is an ordered development starting point, not a release schedule.
    macOS prototype's default-interface support and distinguish unknown radio
    fields. Keep native/legacy output available only as an explicit compatibility
    option if useful.
-3. **Implement Windows and replay backends.** Wait for scan completion before
-   reading BSS results; verify consent, multiple interfaces, hidden SSIDs and
-   timeout behavior on hardware. Replay synthetic or user-supplied captures for
-   development and deterministic downstream tests.
+3. **Expand Windows validation and add a replay backend.** The initial Windows
+   library/CLI waits for scan notifications, returns the draft contract and
+   exports repeated measurements. Verify consent, multiple interfaces, hidden
+   SSIDs and timeout behavior on more hardware. Replay synthetic or user-supplied
+   captures for development and deterministic downstream tests.
 4. **Build the shared survey/heatmap core.** Define the survey/session format,
    sample coordinates and floor-plan scale; implement interpolation, consistent
    strength scales, uncertainty and exports. Heatmaps belong in Marinus itself.

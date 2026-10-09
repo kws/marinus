@@ -11,6 +11,8 @@ results/
 .env
 .env.*
 !.env.example
+backends/windows/**/bin/
+backends/windows/**/obj/
 
 # Survey captures and floor plans stay local unless deliberately added as fixtures.
 surveys/

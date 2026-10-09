@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/kws/marinus/main/contracts/draft/scan.schema.json",
   "title": "Marinus draft scan result 0.1.0",
-  "description": "Design draft; current prototypes do not conform yet. One result per interface.",
+  "description": "Design draft; implemented by Windows, with other platform adapters pending. One result per interface.",
   "type": "object",
   "additionalProperties": false,
   "required": ["contract_version", "backend", "interface", "capabilities", "scan", "observations"],

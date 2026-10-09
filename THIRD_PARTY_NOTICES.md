@@ -25,6 +25,12 @@ includes all of them in the app's Resources directory.
 
 The macOS backend uses Apple's system frameworks. The Linux backend uses the
 distribution-provided Python D-Bus binding and the installed NetworkManager
-service. These runtime dependencies are provided by the host system. Development
+service. Those runtime dependencies are provided by the host system. Development
 validation uses `jsonschema`, installed separately via `requirements-dev.txt`.
-Any future bundled dependencies need a distribution-specific license inventory.
+
+The Windows backend uses .NET 10 and the system-provided Native WLAN API. A
+self-contained Windows distribution includes the .NET runtime. Its publish
+target copies the runtime package's original `LICENSE.TXT` and complete
+`THIRD-PARTY-NOTICES.TXT` into `licenses/dotnet/`, alongside Marinus's license and
+the retained upstream notices. Framework-dependent builds use the host's .NET
+installation instead. Keep these distribution files with the executable.

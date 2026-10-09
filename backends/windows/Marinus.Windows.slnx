@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Marinus.Cli/Marinus.Cli.csproj" />
+    <Project Path="src/Marinus.Windows/Marinus.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Marinus.Windows.Tests/Marinus.Windows.Tests.csproj" />
+  </Folder>
+</Solution>

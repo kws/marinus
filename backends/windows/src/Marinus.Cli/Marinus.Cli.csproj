@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>marinus</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Marinus.Windows/Marinus.Windows.csproj" />
+    <InternalsVisibleTo Include="Marinus.Windows.Tests" />
+  </ItemGroup>
+  <Target Name="CopyDistributionNotices" AfterTargets="Publish">
+    <PropertyGroup>
+      <MarinusRoot>$(MSBuildThisFileDirectory)../../../../</MarinusRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <MarinusNotice Include="$(MarinusRoot)LICENSE;$(MarinusRoot)THIRD_PARTY_NOTICES.md" />
+      <UpstreamNotice Include="$(MarinusRoot)licenses/*.txt" />
+      <DotNetRuntimePack Include="@(ResolvedRuntimePack)" Condition="'$(SelfContained)' == 'true' and '%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App'" />
+      <DotNetNotice Include="@(DotNetRuntimePack -> '%(PackageDirectory)/LICENSE.TXT')" />
+      <DotNetNotice Include="@(DotNetRuntimePack -> '%(PackageDirectory)/THIRD-PARTY-NOTICES.TXT')" />
+    </ItemGroup>
+    <Error Condition="'$(SelfContained)' == 'true' and '@(DotNetNotice)' == ''" Text="No .NET runtime notices were resolved for this self-contained publish." />
+    <Copy SourceFiles="@(MarinusNotice)" DestinationFolder="$(PublishDir)" />
+    <Copy SourceFiles="@(UpstreamNotice)" DestinationFolder="$(PublishDir)licenses" />
+    <Copy SourceFiles="@(DotNetNotice)" DestinationFolder="$(PublishDir)licenses/dotnet" Condition="'$(SelfContained)' == 'true'" />
+  </Target>
+</Project>
