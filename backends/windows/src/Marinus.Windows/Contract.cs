@@ -9,7 +9,7 @@ public sealed record InterfaceInfo(string Id, string Name, string? Driver, strin
 public sealed record InterfaceResult(string ContractVersion, BackendInfo Backend,
     IReadOnlyList<InterfaceInfo> Interfaces, ScanError? Error = null);
 public sealed record ScanCapabilities(bool RssiDbm = true, bool StrengthPercent = true,
-    bool NoiseDbm = false, bool ChannelWidthMhz = false, int? LastSeenResolutionMs = null);
+    bool NoiseDbm = false, bool ChannelWidthMhz = true, int? LastSeenResolutionMs = null);
 public sealed record ScanError(string Code, string Message);
 public sealed record ScanInfo(string Status, string StartedAt, string? CompletedAt, ScanError? Error);
 public sealed record Observation(string? Ssid, string? SsidBytesBase64, string? Bssid,

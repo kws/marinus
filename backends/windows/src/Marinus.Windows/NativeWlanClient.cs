@@ -178,10 +178,23 @@ internal static class BssParser
         var entries = new List<BssObservation>();
         for (int index = 0; index < count; index++)
         {
-            var native = Marshal.PtrToStructure<Native.BssEntry>(IntPtr.Add(list, 8 + index * stride));
+            int entryOffset = 8 + index * stride;
+            var native = Marshal.PtrToStructure<Native.BssEntry>(IntPtr.Add(list, entryOffset));
             if (native.Ssid.Length > 32) throw new InvalidDataException("Windows returned an SSID longer than 32 bytes.");
+            int? width = null;
+            // IE offsets are relative to this entry, not to the start of the list.
+            // Invalid optional data must not discard the BSSID's other measurements.
+            ulong ieStart = (ulong)entryOffset + native.IeOffset;
+            if (native.IeSize > 0 && native.IeSize <= 2324
+                && ieStart >= 8UL + (ulong)count * (uint)stride
+                && ieStart + native.IeSize <= totalSize)
+            {
+                var ies = new byte[(int)native.IeSize];
+                Marshal.Copy(IntPtr.Add(list, (int)ieStart), ies, 0, ies.Length);
+                width = AdvertisedChannelWidth.Read(ies, native.CenterFrequencyKhz);
+            }
             entries.Add(new BssObservation(native.Ssid.Bytes[..(int)native.Ssid.Length], native.Bssid,
-                native.Rssi, native.LinkQuality, native.CenterFrequencyKhz, native.HostTimestamp));
+                native.Rssi, native.LinkQuality, native.CenterFrequencyKhz, native.HostTimestamp, width));
         }
         return entries;
     }

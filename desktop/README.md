@@ -63,6 +63,15 @@ Signal meters use fixed display ranges, while labels retain native dBm/percent
 units. Unknown observation freshness stays visible. These meters do not claim
 measurement calibration between platforms.
 
+Each BSSID row shows Band, Channel and Advertised width alongside Frequency.
+Channel is the primary channel, derived from the observed frequency for the
+2.4, 5 and 6 GHz bands (including channel 14 and the special 5935 MHz channel).
+Width is the AP's advertised operating width, not a client link's negotiated
+width or a spectrum measurement. Missing or unrecognized values display
+`Unknown`; width is never inferred from frequency or PHY capability. Older JSON
+captures continue to work, and exports retain `frequency_mhz` and
+`channel_width_mhz`. The table scrolls horizontally in narrower windows.
+
 ## Windows hardware validation
 
 The unsigned x64 NSIS development build was installed and tested on Windows 11

@@ -54,6 +54,9 @@ export function decodeScan(value: unknown): ScanResult {
     }
     if (typeof row.rssi_dbm === 'number' && row.rssi_dbm > 0) throw new Error('Invalid RSSI.');
     if (typeof row.strength_percent === 'number' && (row.strength_percent < 0 || row.strength_percent > 100)) throw new Error('Invalid signal percentage.');
+    for (const field of ['frequency_mhz', 'channel_width_mhz']) {
+      if (row[field] !== null && (!Number.isInteger(row[field]) || (row[field] as number) <= 0)) throw new Error(`Invalid ${field}.`);
+    }
     if (!['fresh', 'cached', 'unknown'].includes(String(row.freshness)) || (scan.status === 'cached' && row.freshness === 'fresh')) throw new Error('Invalid observation freshness.');
     if (row.ssid !== null && typeof row.ssid !== 'string') throw new Error('Invalid network name.');
     if (row.bssid !== null && (typeof row.bssid !== 'string' || !/^[0-9a-f]{2}(:[0-9a-f]{2}){5}$/.test(row.bssid))) throw new Error('Invalid BSSID.');

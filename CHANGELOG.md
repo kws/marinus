@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Show band, primary channel and advertised width for each BSSID in the desktop
+  table. Read optional NetworkManager bandwidth and Windows HT/VHT/HE/EHT
+  operation elements, preserving unknown widths and the existing JSON format.
 - Use compact desktop toolbars, a dense access-point table and a fixed status
   bar. Remove in-window branding and marketing copy; keep scrolling inside the
   table with sticky column headings and system light/dark colors.

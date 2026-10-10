@@ -103,12 +103,12 @@ public sealed class WindowsScanner : IWindowsScanner
         return new Observation(Encoding.UTF8.GetString(entry.Ssid), Convert.ToBase64String(entry.Ssid), bssid,
             entry.RssiDbm, (int)entry.Quality, null,
             entry.FrequencyKhz > 0 && entry.FrequencyKhz % 1000 == 0 ? checked((int)(entry.FrequencyKhz / 1000)) : null,
-            null, bssid is not null && connectedBssid is not null ? bssid == connectedBssid : null, freshness, age);
+            entry.ChannelWidthMhz, bssid is not null && connectedBssid is not null ? bssid == connectedBssid : null, freshness, age);
     }
 }
 
 internal sealed record BssObservation(byte[] Ssid, byte[] Bssid, int RssiDbm, uint Quality,
-    uint FrequencyKhz, ulong HostTimestamp);
+    uint FrequencyKhz, ulong HostTimestamp, int? ChannelWidthMhz = null);
 
 internal interface IWlanClient : IDisposable
 {

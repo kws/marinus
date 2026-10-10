@@ -33,6 +33,14 @@ class SurveyContractTests(unittest.TestCase):
         self.assertEqual(rows[2]["ssid"], "")
         self.assertEqual(base64.b64decode(rows[3]["ssid_bytes_base64"]), b"\xffOffice")
 
+    def test_advertised_width_is_optional_and_never_inferred_from_frequency(self):
+        for width in (20, 40, 80, 160, 320):
+            with self.subTest(width=width):
+                ap = dict(access_point(), Bandwidth=width)
+                self.assertEqual(normalize_ap(ap, False, 12000)["channel_width_mhz"], width)
+        for ap in (access_point(), dict(access_point(), Bandwidth=0), dict(access_point(), Bandwidth=-1)):
+            self.assertIsNone(normalize_ap(ap, False, 12000)["channel_width_mhz"])
+
     def test_cache_age_and_unknown_age_are_explicit(self):
         self.assertEqual(normalize_ap(access_point(), False, 12000, 11000)["freshness"], "cached")
         self.assertEqual(normalize_ap(access_point(), False, 12000)["last_seen_age_ms"], 2000)
@@ -102,8 +110,27 @@ class SurveyContractTests(unittest.TestCase):
         self.assertEqual(value["scan"]["status"], "cached")
         self.assertEqual(value["observations"][0]["strength_percent"], 70)
         self.assertNotIn("security_flags", value["observations"][0])
-        self.assertFalse(value["capabilities"]["channel_width_mhz"])
+        self.assertTrue(value["capabilities"]["channel_width_mhz"])
+        self.assertIsNone(value["observations"][0]["channel_width_mhz"])
         emit_fixture("linux-generated-cached", value)
+
+    def test_collector_preserves_supported_and_unknown_widths_per_bssid(self):
+        class WidthManager(NetworkManager):
+            def __init__(self):
+                self.dbus = type("DBus", (), {"DBusException": RuntimeError})
+            def properties(self, path, name):
+                if name == WIRELESS:
+                    return {"LastScan": 11000, "ActiveAccessPoint": "/ap"}
+                ap = access_point(bssid="AA:BB:CC:DD:EE:01" if path == "/ap" else "AA:BB:CC:DD:EE:02")
+                return dict(ap, Bandwidth=80) if path == "/ap" else ap
+            def interface(self, path, name):
+                return type("Wireless", (), {"GetAllAccessPoints": lambda _: ["/ap", "/unknown"]})()
+        with patch("wifi_scan.boottime_ms", return_value=12000):
+            value = WidthManager().scan("/device", {"Interface": "synthetic0"}, True, False, 25)
+        self.assertEqual([row["channel_width_mhz"] for row in value["observations"]], [80, None])
+        self.assertEqual([row["frequency_mhz"] for row in value["observations"]], [5180, 5180])
+        self.assertTrue(value["capabilities"]["channel_width_mhz"])
+        emit_fixture("linux-generated-widths", value)
 
     def test_real_collector_waits_before_reading_fresh_access_points(self):
         calls = []

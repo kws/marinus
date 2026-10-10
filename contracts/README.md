@@ -30,6 +30,17 @@ measurement, or rescale against the strongest observation in the current scan.
 Consumer-side display/interpolation mappings must be fixed within a survey.
 Having signal data is not a guarantee of calibration across hardware/platforms.
 
+`frequency_mhz` identifies the observed channel frequency. With bonded channels,
+this can be the primary 20 MHz channel's frequency, rather than the center of the
+entire bonded channel. Consumers can derive the band and primary channel number
+from recognized frequencies; unrecognized or missing frequencies stay unknown.
+`channel_width_mhz` is the AP's advertised operating width when the backend can
+read it, not its maximum supported width or an individual client's link width.
+Missing, zero, unsupported or unrecognized widths remain `null`; do not assume
+20 MHz from the frequency alone. These fields are observations at scan time,
+including the existing per-observation freshness limits. Band/channel display
+does not add fields or change the draft contract version.
+
 `ssid` is display text, with `""` representing a known empty/hidden SSID. `null`
 means unavailable. `ssid_bytes_base64` preserves raw bytes where available; do
 not reconstruct them from lossy display text. `bssid` uses lowercase colon-separated
