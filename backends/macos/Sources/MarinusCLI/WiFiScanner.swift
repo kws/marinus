@@ -156,9 +156,9 @@ func ensureAuthorized() throws {
     switch manager.authorizationStatus {
     case .authorizedAlways, .authorizedWhenInUse: return
     case .denied, .restricted:
-        throw WiFiError.message("Location Services denied. Enable access for Marinus in System Settings.")
+        throw BackendFailure(code: "permission_denied", message: "Location Services denied. Enable access for Marinus in System Settings.")
     case .notDetermined:
-        throw WiFiError.message("Location Services authorization timed out.")
+        throw BackendFailure(code: "scan_timeout", message: "Location Services authorization timed out.")
     @unknown default:
         throw WiFiError.message("Unexpected Location Services authorization status.")
     }

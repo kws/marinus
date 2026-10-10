@@ -1,4 +1,4 @@
-# macOS backend prototype
+# macOS scanner
 
 A Swift CLI using CoreWLAN on macOS 13+. It is imported from the macwifi Swift
 fork; see [provenance](../../docs/provenance.md) and the
@@ -10,7 +10,7 @@ From this directory, with Swift 5.9+ and Apple's Command Line Tools or Xcode:
 
 ```sh
 make build
-./dist/marinus scan --bssids --json
+./dist/marinus scan --json
 ./dist/marinus info --bssids --json
 ./dist/marinus help
 ```
@@ -25,26 +25,25 @@ and status through a private Unix socket. The app identity is
 `io.github.kws.marinus`; grant Location Services access to **Marinus** when
 prompted. Previous MacWiFi permission does not cover this new identity.
 
-## Existing prototype behavior
+## Legacy diagnostic behavior
 
 The inherited CLI exposes `scan`, `info`, `password`, `help` and `version`.
 Only the explicit `password <ssid>` command requests a saved Keychain password;
 the scan path does not read credentials. Password lookup is a retained diagnostic
 feature, not part of the proposed cross-platform survey API.
 
-| Behavior | Default summary | `--bssids` |
+| Behavior | `scan --legacy` summary | `scan --legacy --bssids` |
 | --- | --- | --- |
 | Rows | Strongest result for each nonempty SSID | Every observed CoreWLAN network |
 | Connection flag | Matches SSID | Matches a known connected BSSID |
 | Unobserved saved networks | Included with zero radio fields | Omitted |
 | Hidden SSIDs | Omitted | Retained when returned by CoreWLAN |
 
-Use `--bssids` for survey measurements. The current JSON is the inherited array
-of network objects with `ssid`, `bssid`, `rssi`, `noise`, `channel`,
-`channel_band`, `channel_width`, `security`, `phy_mode`, `current` and `saved`.
-It **does not implement the draft Marinus scan envelope**. Its empty identifiers
-and unknown-width sentinel also need adaptation to the shared contract's nulls.
-The prototype currently chooses CoreWLAN's default interface.
+The `--legacy` JSON output retains the inherited network array with `ssid`,
+`bssid`, `rssi`, `noise`, `channel`, `channel_band`, `channel_width`, `security`,
+`phy_mode`, `current` and `saved`. It chooses CoreWLAN's default interface.
+Survey `scan --json` uses the shared envelope instead, with explicit nulls and
+interface selection; it never adds saved-only placeholders.
 
 ## Signing and distribution
 
@@ -87,3 +86,16 @@ Live scans and permission persistence need separate hardware/signing checks.
 
 To use a separately built bundle, set `MARINUS_APP`. For app round-trip tests,
 set `MARINUS_TEST_APP` to its path.
+
+## Shared survey commands and packaging
+
+`scan --json` now emits the shared draft scan envelope and retains all observed
+BSSIDs. Use `interfaces --json`, `scan --interface en0 --cached --json` and
+`watch --count 10 --json --output captures/walk.jsonl` for the common protocol.
+The original summary/array output is available with `scan --legacy`; add
+`--bssids` there for the former detailed format. `info` and `password` remain
+explicit diagnostic commands.
+
+CoreWLAN exposes no per-observation age, so freshness remains `unknown`, even
+after a completed scan. Missing radio values and masked identifiers are null.
+See [CLI protocol](../../contracts/cli.md) and [installers](../../docs/packaging.md).

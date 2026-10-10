@@ -1,0 +1,5 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main", "description": "Local Marinus window", "windows": ["main"],
+  "permissions": ["core:default"]
+}

@@ -9,17 +9,19 @@ data that applications can consume on macOS, Linux and Windows.
 
 ## Current state
 
-This repository contains functioning macOS, Linux and Windows scanners. Their
-command interfaces and JSON output are **not yet unified**: Windows implements
-the draft shared contract, while macOS and Linux retain their prototype formats.
-The cross-platform shared library API and heatmap engine are planned work.
+This repository contains functioning macOS, Linux and Windows scanners. Their survey commands now share a draft JSON contract and common
+interface/scan/watch behavior. An initial Tauri desktop explorer provides
+interface selection, scans, cache reads and export. The shared survey/heatmap
+engine and installed-platform release validation remain planned work.
 
 | Component | Status | Implementation |
 | --- | --- | --- |
 | macOS scanning | Imported prototype; macOS 13+ | Swift, CoreWLAN and a signed app bundle |
 | Linux scanning | Prototype tested on Pop!_OS 22.04 | Python, NetworkManager and system D-Bus |
 | Windows scanning | Initial CLI and C# library; scan, cache and watch | .NET 10 and Native WLAN API |
-| Shared scan contract | Draft; implemented by Windows | JSON Schema and synthetic examples |
+| Shared scan contract | Draft; implemented by all three adapters | JSON Schema, generated-output and behavior checks |
+| Desktop GUI | Initial explorer and synthetic demo | Tauri 2 and TypeScript |
+| Installers | Development scripts and signing hooks | macOS PKG/DMG, Windows setup EXE, Linux DEB |
 | Heatmap engine | Planned core component | Survey samples, coordinates and interpolation |
 
 macOS and Windows report native RSSI in dBm. Linux preserves NetworkManager's
@@ -35,7 +37,7 @@ Install Apple's Command Line Tools or Xcode with Swift 5.9 or newer, then:
 
 ```sh
 make build-macos
-./backends/macos/dist/marinus scan --bssids --json
+./backends/macos/dist/marinus scan --json
 ./backends/macos/dist/marinus help
 ```
 
@@ -43,17 +45,17 @@ The command lives inside `Marinus.app`; keep the bundle intact. macOS must grant
 Location Services access to **Marinus**. Its app identity is distinct from
 MacWiFi, so an existing MacWiFi permission does not grant Marinus access.
 See the [macOS backend guide](backends/macos/README.md) for signing and commands.
-Use `--bssids` for survey measurements: the inherited default summary can include
-saved networks that were not observed.
+Survey scans retain every observed BSSID. The original summary/output is available
+with `scan --legacy`; it can include saved networks that were not observed.
 
 ### Linux
 
 Requires Python 3.10+, NetworkManager and the distribution's Python `dbus` module:
 
 ```sh
-python3 backends/linux/wifi_scan.py --interfaces
-python3 backends/linux/wifi_scan.py --interface wlan0
-python3 backends/linux/wifi_scan.py --cached
+python3 backends/linux/wifi_scan.py interfaces --json
+python3 backends/linux/wifi_scan.py scan --interface wlan0 --json
+python3 backends/linux/wifi_scan.py scan --cached --json
 ```
 
 Replace `wlan0` with your interface. Fresh scan authorization uses the existing
@@ -74,6 +76,20 @@ powershell -NoProfile -ExecutionPolicy Bypass -File backends/windows/scripts/bui
 Allow Windows location access when prompted. The [Windows guide](backends/windows/README.md)
 covers interface selection, permissions, cached reads, JSON Lines export and the
 C# library. Heatmap rendering and survey positions are future work.
+
+## Desktop and installers
+
+```sh
+cd desktop
+npm ci
+npm run desktop:dev
+```
+
+Requires the platform build tools and Rust/Node; see the [desktop guide](desktop/README.md).
+`npm run dev` provides a browser preview using a labeled synthetic demo.
+Download CI installers using [the test-build guide](docs/test-builds.md), or build
+development installers with [the packaging guide](docs/packaging.md).
+Public signing requires release credentials and installed-platform validation.
 
 ## Development
 

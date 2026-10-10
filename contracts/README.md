@@ -1,10 +1,11 @@
 # Draft shared scan contract
 
-**Status: design draft, version 0.1.0. Windows implements this format; the macOS
-and Linux prototypes retain their earlier formats.** The schema and fixtures
-define a starting point for discussion and adapters. Windows has synthetic
-behavior tests as well as generated-output schema validation; passing schema
-validation alone is not a claim of platform conformance.
+**Status: design draft, version 0.1.0, implemented by all three adapters.**
+The schema and fixtures define the starting point for consumers. Synthetic
+behavior tests and generated-output schema validation exercise each adapter;
+passing those checks alone is not a claim of installed-platform conformance.
+See the [common CLI protocol](cli.md) and
+[interface enumeration schema](draft/interfaces.schema.json).
 
 The draft [scan schema](draft/scan.schema.json) defines one result per interface.
 Examples in [draft/fixtures](draft/fixtures/) are entirely synthetic, including
@@ -56,12 +57,13 @@ permissions, timing and native-field mapping with controlled backend inputs.
 
 ## Compatibility and next decisions
 
-The existing Linux `schema_version: 1` and macOS network arrays are prototype
-formats and are not equivalent to this contract. Version 0.1.0 is deliberately
+The earlier Linux `schema_version: 1` output is replaced by the shared envelope.
+macOS network arrays remain available only through `scan --legacy`. Version 0.1.0 is deliberately
 unstable while adapters and consumers settle the design. Stabilize semantics
 before advertising contract 1.0.0.
 
-Open decisions include interface enumeration envelopes, watch/stream events,
-cancellation, security representation and the survey/session format. Security
+Enumeration, JSON Lines watch output and cancellation are specified in the
+[CLI protocol](cli.md). Open decisions include richer stream events, security
+representation and the survey/session format. Security
 and platform-specific extensions are omitted from this first shared scan draft
 rather than pretending the existing backend encodings are equivalent.

@@ -134,3 +134,10 @@ Further live checks include consent denial, multiple adapters, radio-off
 behavior, additional drivers and a real walk-around survey. JSON captures can be validated with
 `python scripts/check-contracts.py captures/walk.jsonl`; that verifies shape and
 measurement invariants rather than radio behavior.
+
+## Shared protocol and installers
+
+`interfaces --json` returns a versioned enumeration envelope, including structured
+errors. Scan/watch retain their draft envelope and JSON Lines behavior. See the
+[common CLI protocol](../../contracts/cli.md), [desktop guide](../../desktop/README.md)
+and [installer/signing instructions](../../docs/packaging.md).

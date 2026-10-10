@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Use compact desktop toolbars, a dense access-point table and a fixed status
+  bar. Remove in-window branding and marketing copy; keep scrolling inside the
+  table with sticky column headings and system light/dark colors.
+- Fit the Windows desktop startup window to the monitor work area when display
+  scaling would otherwise place its frame below the taskbar. Validate the x64
+  development installer and real GUI scans/exports on Windows 11.
+
+- Unify survey scan and interface-enumeration JSON across macOS, Linux and
+  Windows; add macOS/Linux repeated capture and explicit cached reads, preserving
+  native units and unknown freshness. Retain macOS scans through `--legacy`.
+- Add an initial Tauri desktop explorer with interface selection, scans, cache
+  reads, cancellation, filtering, native JSON export and a synthetic demo.
+- Add CLI installer scripts for macOS/Windows/Linux and desktop packaging with
+  signing/notarization hooks, locked dependencies and retained dependency notices.
 - Add a Windows Native WLAN library and CLI with fresh/cached scans, interface
   selection, native RSSI and raw identifiers, draft-contract JSON, repeated
   measurements and JSON Lines export. Add synthetic behavior/schema tests and

@@ -5,6 +5,9 @@ namespace Marinus.Windows;
 
 public sealed record BackendInfo(string Platform = "windows", string Name = "native-wlan", string BackendVersion = "0.1.0");
 public sealed record ScanInterface(string Id, string? Driver = null);
+public sealed record InterfaceInfo(string Id, string Name, string? Driver, string? State);
+public sealed record InterfaceResult(string ContractVersion, BackendInfo Backend,
+    IReadOnlyList<InterfaceInfo> Interfaces, ScanError? Error = null);
 public sealed record ScanCapabilities(bool RssiDbm = true, bool StrengthPercent = true,
     bool NoiseDbm = false, bool ChannelWidthMhz = false, int? LastSeenResolutionMs = null);
 public sealed record ScanError(string Code, string Message);

@@ -11,16 +11,18 @@ contract version each backend advertises.
 backends/macos/    Swift scanner, CLI, app packaging and tests
 backends/linux/    NetworkManager scanner, Python entry points and tests
 backends/windows/ C# Native WLAN library, CLI, publishing and synthetic tests
+desktop/          Tauri/TypeScript explorer and fixed backend process bridge
 contracts/        Draft schema, behavior specification and synthetic fixtures
 heatmaps/         Planned shared survey/heatmap core
 docs/             Architecture, roadmap and import provenance
 licenses/         Complete upstream license notices
 ```
 
-The macOS and Linux prototypes keep their existing formats. Windows exposes
-the draft contract through its library and CLI. The draft remains subject to
-change; once all adapters conform, the CLI and library should expose the same
-scan object. Format validation alone
+All platform survey commands expose the draft contract. The draft remains subject
+to change; platform library entry points remain in their native languages.
+The desktop calls a fixed, versioned process protocol, preserves the complete
+macOS privacy app and bundles the Windows collector. Linux uses system Python
+with distro D-Bus bindings. Enumeration never initiates a scan. Format validation alone
 cannot prove that a scan completed, a reading is fresh or a unit has the intended
 meaning; backend behavior needs conformance tests as well.
 
@@ -51,7 +53,8 @@ The Windows backend uses Native WLAN scan notifications and BSS results. It
 retains native RSSI, link quality and raw SSID bytes, and uses host receive
 timestamps for observation age/freshness. Its watch command exports JSON Lines
 for repeated measurements; consent/permissions still require hardware checks.
-A replay backend is also planned so downstream tools can develop without radios.
+The desktop includes a labeled synthetic replay fixture for development without
+radios; a full capture-replay backend remains planned.
 
 ## Survey and heatmap responsibilities
 

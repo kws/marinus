@@ -1,12 +1,12 @@
 # Linux NetworkManager prototype
 
 The Python collector talks directly to NetworkManager over system D-Bus and
-emits one JSON object per Wi-Fi interface, one line per object. Its existing
-`schema_version: 1` is the **prototype's local format**, not a stable Marinus
-contract version. It does not yet implement the shared draft envelope.
+implements the [shared draft contract](../../contracts/README.md). Each scan
+selects one interface; choose explicitly when several devices are available.
+`watch --json` emits one result per line and retains its selected device.
 
-The library entry points are `NetworkManager.devices()` and
-`NetworkManager.scan()`; the CLI calls the same collector.
+The library entry points are `NetworkManager.devices()` and `NetworkManager.scan()`.
+`collect()` adds selection and structured failure handling; the CLI uses it.
 
 ## Run
 
@@ -14,13 +14,13 @@ Requires Linux, Python 3.10+, NetworkManager and the distribution's Python `dbus
 module. From the repository root:
 
 ```sh
-python3 backends/linux/wifi_scan.py --interfaces
-python3 backends/linux/wifi_scan.py --interface wlan0
-python3 backends/linux/wifi_scan.py --cached
+python3 backends/linux/wifi_scan.py interfaces --json
+python3 backends/linux/wifi_scan.py scan --interface wlan0 --json
+python3 backends/linux/wifi_scan.py scan --cached --json
 ```
 
-Replace `wlan0` with a reported interface name. Without `--interface`, all Wi-Fi
-interfaces are scanned. Scanning does not connect, disconnect, change profiles
+Replace `wlan0` with a reported interface name. Without `--interface`, the only available
+Wi-Fi device is selected. Several devices require an explicit choice. Scanning does not connect, disconnect, change profiles
 or read passwords.
 
 Fresh requests use NetworkManager's existing permissions. Desktop and SSH
@@ -55,7 +55,7 @@ PolicyKit or install software.
   newer, older and unknown/same-second readings. Known cached observations should
   not become new survey measurements.
 - `--cached` is explicit. Failed fresh requests return structured errors and
-  exit 2 rather than silently falling back to cached data.
+  exit 1 rather than silently falling back to cached data.
 
 ## Earlier feasibility checks
 
@@ -81,8 +81,8 @@ This was stationary collection, not a walk-around survey or heatmap validation.
 python3 -m unittest discover -s backends/linux -v
 ```
 
-Five synthetic tests cover units, BSSID/SSID byte preservation, age/freshness,
-scan completion and timeout. They run without Linux or the D-Bus binding.
+Synthetic tests cover units, BSSID/SSID byte preservation, age/freshness, scan
+completion, timeout, interface selection and capture-file preservation. They run without Linux or the D-Bus binding.
 
 NetworkManager documentation:
 [access-point properties](https://networkmanager.dev/docs/api/latest/gdbus-org.freedesktop.NetworkManager.AccessPoint.html)

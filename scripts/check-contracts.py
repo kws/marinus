@@ -10,8 +10,13 @@ from pathlib import Path
 from jsonschema import Draft202012Validator, FormatChecker
 
 
-def validate(value, validator, label):
-    validator.validate(value)
+def validate(value, validators, label):
+    validators["interfaces" if "interfaces" in value else "scan"].validate(value)
+    if "interfaces" in value:
+        ids = [item["id"] for item in value["interfaces"]]
+        if len(ids) != len(set(ids)):
+            raise ValueError(f"{label}: duplicate interface IDs")
+        return
     capabilities = value["capabilities"]
     scan = value["scan"]
     if scan["completed_at"] is not None:
@@ -36,9 +41,11 @@ def main():
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     draft = root / "contracts/draft"
-    schema = json.loads((draft / "scan.schema.json").read_text())
-    Draft202012Validator.check_schema(schema)
-    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    validators = {}
+    for kind in ("scan", "interfaces"):
+        schema = json.loads((draft / f"{kind}.schema.json").read_text())
+        Draft202012Validator.check_schema(schema)
+        validators[kind] = Draft202012Validator(schema, format_checker=FormatChecker())
     paths = args.paths or [draft / "fixtures"]
     fixtures = sorted(file for path in paths for file in (path.glob("*.json") if path.is_dir() else [path]))
     if not fixtures:
@@ -48,12 +55,12 @@ def main():
         text = fixture.read_text(encoding="utf-8-sig")
         values = [json.loads(line) for line in text.splitlines() if line.strip()] if fixture.suffix == ".jsonl" else [json.loads(text)]
         for index, value in enumerate(values, 1):
-            validate(value, validator, f"{fixture.name}:{index}")
+            validate(value, validators, f"{fixture.name}:{index}")
             count += 1
         print(f"PASS {fixture.name} ({len(values)} results)")
     if not count:
         raise ValueError("No scan results found")
-    print(f"Validated {count} draft scan results; schema checks alone do not establish live scan behavior.")
+    print(f"Validated {count} draft backend results; schema checks alone do not establish live scan behavior.")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,9 @@ struct MarinusMain {
         let result: CommandResult
         do {
             let command = try parseCommand(arguments)
+            if command.kind == .watch || (command.kind == .scan && !command.legacy) {
+                exit(try runSurveyCLI(command))
+            }
             if command.needsApp {
                 if command.kind == .password && !command.noPromptHint {
                     let hint = "→ macOS may prompt for Keychain access to \(String(reflecting: command.ssid!))\n"

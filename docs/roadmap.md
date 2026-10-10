@@ -1,15 +1,17 @@
 # Initial roadmap
 
-This is an ordered development starting point, not a release schedule.
+This is an ordered development starting point, not a release schedule. The
+common survey CLI and initial desktop explorer are now implemented. Installer
+foundations are described in [packaging](packaging.md); signed distribution and
+installed-platform validation remain outstanding.
 
 1. **Agree the shared contract and behavior.** Review the draft, settle interface
    identity, capabilities, raw SSID handling, timestamps, freshness and errors.
    Add cross-backend conformance cases alongside the schema fixtures.
-2. **Adapt macOS and Linux.** Expose the same object through library entry points
-   and a common CLI, preserving each backend's original measurements. Expand the
-   macOS prototype's default-interface support and distinguish unknown radio
-   fields. Keep native/legacy output available only as an explicit compatibility
-   option if useful.
+2. **Validate the adapted macOS and Linux backends.** The common survey CLI now
+   preserves each backend's original measurements, selects interfaces explicitly
+   and distinguishes unknown radio fields. macOS keeps legacy output as an
+   explicit compatibility option. Verify the new protocol on installed hardware.
 3. **Expand Windows validation and add a replay backend.** The initial Windows
    library/CLI waits for scan notifications, returns the draft contract and
    exports repeated measurements. Verify consent, multiple interfaces, hidden
@@ -22,5 +24,5 @@ This is an ordered development starting point, not a release schedule.
    compare coverage patterns and record adapter-specific limits. The existing
    Linux checks are stationary scans, not a completed heatmap validation.
 6. **Package releases.** Document administrator-controlled Linux authorization,
-   sign/notarize macOS distribution builds, and add Windows packaging. Audit
+   sign/notarize macOS distribution builds, and validate the Windows installers. Audit
    bundled dependencies and retained notices before publishing binaries.

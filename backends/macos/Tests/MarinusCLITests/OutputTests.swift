@@ -14,7 +14,7 @@ final class OutputTests {
     }
 
     func testScanJSONPreservesTheExistingFieldNamesAndValues() throws {
-        let result = executeCommand(CLICommand(kind: .scan, asJSON: true), version: "test", scan: { _ in [self.network] })
+        let result = executeCommand(CLICommand(kind: .scan, asJSON: true, legacy: true), version: "test", scan: { _ in [self.network] })
         let rows = try expectUnwrap(JSONSerialization.jsonObject(with: Data(result.stdout.utf8)) as? [[String: Any]])
         try expectEqual(rows.count, 1)
         try expectEqual(Set(rows[0].keys), [
@@ -36,7 +36,7 @@ final class OutputTests {
     }
 
     func testEmptyScanIsAJSONList() throws {
-        let result = executeCommand(CLICommand(kind: .scan, asJSON: true), version: "test", scan: { _ in [] })
+        let result = executeCommand(CLICommand(kind: .scan, asJSON: true, legacy: true), version: "test", scan: { _ in [] })
         try expectEqual(result.stdout, "[]\n")
     }
 
@@ -53,7 +53,7 @@ final class OutputTests {
     }
 
     func testDetailedModeIsPassedThroughToScanning() throws {
-        let result = executeCommand(CLICommand(kind: .scan, allBSSIDs: true), version: "test", scan: { mode in
+        let result = executeCommand(CLICommand(kind: .scan, allBSSIDs: true, legacy: true), version: "test", scan: { mode in
             try expectEqual(mode, .bssids)
             return []
         })
@@ -79,7 +79,7 @@ final class OutputTests {
     }
 
     func testErrorsKeepJSONStdoutClean() throws {
-        let result = executeCommand(CLICommand(kind: .scan, asJSON: true), version: "test", scan: { _ in
+        let result = executeCommand(CLICommand(kind: .scan, asJSON: true, legacy: true), version: "test", scan: { _ in
             throw WiFiError.message("synthetic denied")
         })
         try expectEqual(result.exitCode, 1)

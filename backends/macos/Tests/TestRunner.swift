@@ -37,7 +37,10 @@ func expectThrows<T>(_ expression: @autoclosure () throws -> T, _ message: Strin
 struct TestRunner {
     static func main() {
         let cases: [(String, () throws -> Void)] = [
-            ("testDefaultScanPreservesSummaryMode", CommandTests().testDefaultScanPreservesSummaryMode),
+            ("testNativeMappingPreservesNullsBytesAndUnknownFreshness", ContractTests().testNativeMappingPreservesNullsBytesAndUnknownFreshness),
+            ("testSharedScanAndFailureEnvelope", ContractTests().testSharedScanAndFailureEnvelope),
+            ("testCommonOptionsAndExplicitCompatibilityMode", ContractTests().testCommonOptionsAndExplicitCompatibilityMode),
+            ("testDefaultScanUsesSharedContract", CommandTests().testDefaultScanUsesSharedContract),
             ("testDetailedJSONScanAndInfo", CommandTests().testDetailedJSONScanAndInfo),
             ("testPasswordFlagsWorkBeforeOrAfterSSID", CommandTests().testPasswordFlagsWorkBeforeOrAfterSSID),
             ("testDoubleDashAndBooleanFlags", CommandTests().testDoubleDashAndBooleanFlags),

@@ -1,10 +1,10 @@
 import Foundation
 
 final class CommandTests {
-    func testDefaultScanPreservesSummaryMode() throws {
+    func testDefaultScanUsesSharedContract() throws {
         let command = try parseCommand(["scan"])
         try expectEqual(command, CLICommand(kind: .scan))
-        try expectEqual(command.scanMode, .summary)
+        try expectFalse(command.legacy)
     }
 
     func testDetailedJSONScanAndInfo() throws {
@@ -43,7 +43,7 @@ final class CommandTests {
             [], ["unknown"], ["scan", "extra"], ["info", "--no-prompt-hint"],
             ["scan", "--json=maybe"], ["password"], ["password", "one", "two"],
             ["password", "Home", "--bssids"], ["scan", "--timeout"],
-            ["scan", "--timeout=0s"], ["scan", "--timeout=-1s"],
+            ["scan", "--timeout=0s"], ["scan", "--timeout=-1s"], ["scan", "--timeout=nan"],
         ] {
             try expectThrows(try parseCommand(arguments), "\(arguments)")
         }
