@@ -18,6 +18,9 @@ BssObservation Entry(byte[]? ssid = null, int rssi = -55, uint quality = 72, Dat
     byte lastOctet = 1, ulong? timestamp = null) => new(ssid ?? Encoding.UTF8.GetBytes("ExampleNet"),
     [2, 0, 0, 0, 0, lastOctet], rssi, quality, 5180000,
     timestamp ?? (ulong)(seen ?? start.AddSeconds(1)).UtcDateTime.ToFileTimeUtc());
+byte[] Ie(byte id, params byte[] data) => [id, checked((byte)data.Length), .. data];
+byte[] Ht(byte flags) => Ie(61, [36, flags, .. new byte[20]]);
+byte[] Vht(byte width, byte segment0 = 42, byte segment1 = 0) => Ie(192, width, segment0, segment1, 0, 0);
 (WindowsScanner Scanner, FakeClient Client) Setup()
 {
     var clock = new FakeClock { Now = start };
@@ -38,9 +41,83 @@ AsyncTest("Native measurements, connection and contract envelope", async () =>
     Assert(row.Bssid == "02:00:00:00:00:01" && row.Connected == true);
     Assert(row.NoiseDbm is null && row.ChannelWidthMhz is null && result.Interface.Driver is null);
     Assert(result.Capabilities.LastSeenResolutionMs is null && !result.Capabilities.NoiseDbm);
+    Assert(result.Capabilities.ChannelWidthMhz);
     Assert(client.Calls.SequenceEqual(["interfaces", "scan", "bss", "connection", "dispose"]));
     using var json = JsonDocument.Parse(ContractJson.Serialize(result));
     Assert(json.RootElement.GetProperty("scan").GetProperty("started_at").GetString()!.EndsWith('Z'));
+});
+
+Test("HT and VHT operation widths override PHY capabilities", () =>
+{
+    // A capability element advertising 40 MHz support must not imply operation at 40 MHz.
+    byte[] capability = Ie(45, [2, .. new byte[25]]);
+    Assert(AdvertisedChannelWidth.Read(capability, 2412000) is null);
+    Assert(AdvertisedChannelWidth.Read([.. capability, .. Ht(0)], 2412000) == 20);
+    Assert(AdvertisedChannelWidth.Read(Ht(5), 2412000) == 40);
+    Assert(AdvertisedChannelWidth.Read(Ht(7), 2412000) == 40);
+    Assert(AdvertisedChannelWidth.Read(Ht(6), 2412000) is null);
+    Assert(AdvertisedChannelWidth.Read([.. Ht(5), .. Vht(0)], 5180000) == 40);
+    Assert(AdvertisedChannelWidth.Read(Vht(0), 5180000) is null);
+    Assert(AdvertisedChannelWidth.Read([.. Ht(5), .. Vht(1)], 5180000) == 80);
+    Assert(AdvertisedChannelWidth.Read(Vht(1, 42, 50), 5180000) == 160);
+    Assert(AdvertisedChannelWidth.Read(Vht(2, 50), 5180000) == 160);
+    Assert(AdvertisedChannelWidth.Read(Vht(1, 42, 106), 5180000) is null);
+    Assert(AdvertisedChannelWidth.Read(Vht(3, 42, 106), 5180000) is null);
+    Assert(AdvertisedChannelWidth.Read(Vht(7), 5180000) is null);
+    Assert(AdvertisedChannelWidth.Read(Vht(1, 0), 5180000) is null);
+});
+
+Test("HE optional fields and EHT operating widths support 6 GHz and Wi-Fi 7", () =>
+{
+    byte[] he80 = Ie(255, 36, 0, 0, 2, 0, 0, 0, 5, 2, 7, 0, 0);
+    byte[] he160 = Ie(255, 36, 0, 0, 2, 0, 0, 0, 5, 3, 7, 15, 0);
+    byte[] he160Original = Ie(255, 36, 0, 0, 2, 0, 0, 0, 5, 3, 15, 0, 0);
+    byte[] heSplit = Ie(255, 36, 0, 0, 2, 0, 0, 0, 5, 3, 7, 39, 0);
+    // Embedded VHT information and a co-hosted-BSS byte precede the 6 GHz fields.
+    byte[] heOptional = Ie(255, 36, 0, 0xc0, 2, 0, 0, 0, 1, 42, 0, 3, 5, 2, 7, 0, 0);
+    Assert(AdvertisedChannelWidth.Read(he80, 5975000) == 80);
+    Assert(AdvertisedChannelWidth.Read(he160, 5975000) == 160);
+    Assert(AdvertisedChannelWidth.Read(he160Original, 5975000) == 160);
+    Assert(AdvertisedChannelWidth.Read(heSplit, 5975000) is null);
+    Assert(AdvertisedChannelWidth.Read(heOptional, 5975000) == 80);
+    Assert(AdvertisedChannelWidth.Read(Ie(255, 36, 0, 0, 2, 0, 0, 0, 5, 0, 5, 0, 0), 5975000) == 20);
+    Assert(AdvertisedChannelWidth.Read(Ie(255, 36, 0, 0, 2, 0, 0, 0, 5, 1, 3, 0, 0), 5975000) == 40);
+    Assert(AdvertisedChannelWidth.Read(Ie(255, 36, 0, 0x40, 0, 0, 0, 0, 1, 42, 0), 5180000) == 80);
+    Assert(AdvertisedChannelWidth.Read(Ht(0), 5975000) is null);
+    byte[] eht320 = Ie(255, 106, 1, 0, 0, 0, 0, 4, 31, 63);
+    Assert(AdvertisedChannelWidth.Read([.. he80, .. eht320], 5975000) == 320);
+    Assert(AdvertisedChannelWidth.Read(eht320, 5180000) is null);
+    Assert(AdvertisedChannelWidth.Read([.. he80, .. Ie(255, 106, 2, 0, 0, 0, 0)], 5975000) is null);
+    Assert(AdvertisedChannelWidth.Read(Ie(255, 106, 3, 0, 0, 0, 0, 3, 7, 15, 0, 0), 5975000) == 160);
+    // If EHT has no separate operation info, the advertised HE operation still applies.
+    Assert(AdvertisedChannelWidth.Read([.. he80, .. Ie(255, 106, 0, 0, 0, 0, 0)], 5975000) == 80);
+});
+
+Test("Missing, malformed and unsupported operation data remain unknown", () =>
+{
+    foreach (byte[] ies in new byte[][]
+    {
+        [], [61], [61, 22, 36, 0], Ie(61, 36, 0), Ie(192, 1, 42),
+        [.. Vht(1), 255], [.. Ht(0), .. Ht(5)], Ie(255),
+        Ie(255, 36, 0, 0x40, 2, 0, 0, 0), // HE optional data truncated
+        Ie(255, 106, 1, 0, 0, 0, 0), // EHT operation information absent
+        Ie(255, 106, 3, 0, 0, 0, 0, 4, 31, 63), // Bitmap truncated
+        Ie(255, 106, 1, 0, 0, 0, 0, 7, 31, 63), // Reserved EHT width
+    })
+        foreach (uint frequency in new uint[] { 2412000, 5180000, 5975000 })
+            Assert(AdvertisedChannelWidth.Read(ies, frequency) is null);
+});
+
+AsyncTest("Advertised widths survive normalization and JSON export for individual BSSIDs", async () =>
+{
+    var (scanner, client) = Setup();
+    client.Entries = [Entry() with { ChannelWidthMhz = 80 }, Entry(lastOctet: 2)];
+    var result = await scanner.ScanAsync();
+    Assert(result.Observations[0].ChannelWidthMhz == 80 && result.Observations[1].ChannelWidthMhz is null);
+    using var json = JsonDocument.Parse(ContractJson.Serialize(result));
+    Assert(json.RootElement.GetProperty("observations")[0].GetProperty("channel_width_mhz").GetInt32() == 80);
+    Assert(json.RootElement.GetProperty("observations")[1].GetProperty("channel_width_mhz").ValueKind == JsonValueKind.Null);
+    fixtures["windows-widths"] = result;
 });
 
 Test("Freshness uses host FILETIME rather than request completion", () =>
@@ -205,6 +282,49 @@ Test("Native BSS buffer parsing preserves binary fields and validates bounds", (
         Marshal.StructureToPtr(native, IntPtr.Add(memory, 8), false);
         try { BssParser.Read(memory); throw new Exception("Oversized SSID accepted"); }
         catch (InvalidDataException) { }
+    }
+    finally { Marshal.FreeHGlobal(memory); }
+});
+
+Test("Native IE buffers use per-entry offsets and keep bad optional data unknown", () =>
+{
+    int stride = Marshal.SizeOf<Native.BssEntry>();
+    byte[][] ies = [Ht(0), Vht(1)];
+    int dataStart = 8 + 2 * stride;
+    int total = dataStart + ies.Sum(data => data.Length);
+    var memory = Marshal.AllocHGlobal(total);
+    try
+    {
+        Marshal.WriteInt32(memory, total);
+        Marshal.WriteInt32(memory, 4, 2);
+        for (int index = 0; index < 2; index++)
+        {
+            int offset = 8 + index * stride;
+            var native = new Native.BssEntry
+            {
+                Ssid = new Native.Ssid { Length = 0, Bytes = new byte[32] },
+                Bssid = [2, 0, 0, 0, 0, (byte)(index + 1)], Rssi = -55, LinkQuality = 70,
+                CenterFrequencyKhz = 5180000, Rates = new Native.RateSet { Rates = new ushort[126] },
+                IeOffset = (uint)(dataStart - offset), IeSize = (uint)ies[index].Length
+            };
+            Marshal.StructureToPtr(native, IntPtr.Add(memory, offset), false);
+            Marshal.Copy(ies[index], 0, IntPtr.Add(memory, dataStart), ies[index].Length);
+            dataStart += ies[index].Length;
+        }
+        var rows = BssParser.Read(memory);
+        Assert(rows[0].ChannelWidthMhz == 20 && rows[1].ChannelWidthMhz == 80);
+        var first = Marshal.PtrToStructure<Native.BssEntry>(IntPtr.Add(memory, 8));
+        foreach (var invalid in new (uint Offset, uint Size)[]
+        {
+            (uint.MaxValue, 22), (first.IeOffset, uint.MaxValue), (0, 22), (first.IeOffset, 0)
+        })
+        {
+            var broken = first;
+            broken.IeOffset = invalid.Offset; broken.IeSize = invalid.Size;
+            Marshal.StructureToPtr(broken, IntPtr.Add(memory, 8), false);
+            rows = BssParser.Read(memory);
+            Assert(rows.Count == 2 && rows[0].ChannelWidthMhz is null && rows[1].ChannelWidthMhz == 80);
+        }
     }
     finally { Marshal.FreeHGlobal(memory); }
 });

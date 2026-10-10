@@ -35,6 +35,32 @@
       "connected": true,
       "freshness": "unknown",
       "last_seen_age_ms": null
+    },
+    {
+      "ssid": "ExampleNet",
+      "ssid_bytes_base64": "RXhhbXBsZU5ldA==",
+      "bssid": "02:00:00:00:00:02",
+      "rssi_dbm": -65,
+      "strength_percent": null,
+      "noise_dbm": -95,
+      "frequency_mhz": 2437,
+      "channel_width_mhz": 20,
+      "connected": false,
+      "freshness": "unknown",
+      "last_seen_age_ms": null
+    },
+    {
+      "ssid": "",
+      "ssid_bytes_base64": "",
+      "bssid": "02:00:00:00:00:03",
+      "rssi_dbm": -75,
+      "strength_percent": null,
+      "noise_dbm": null,
+      "frequency_mhz": 5975,
+      "channel_width_mhz": null,
+      "connected": false,
+      "freshness": "unknown",
+      "last_seen_age_ms": null
     }
   ]
 }

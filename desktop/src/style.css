@@ -70,10 +70,13 @@ input::placeholder { color: var(--muted); }
 
 /* This is the only scrolling region. Both toolbars and the status bar stay put. */
 .table-wrap { position: relative; min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; background: var(--surface); }
-table { width: 100%; min-width: 760px; table-layout: fixed; border-spacing: 0; text-align: left; font-size: 12px; }
+table { width: 100%; min-width: 1060px; table-layout: fixed; border-spacing: 0; text-align: left; font-size: 12px; }
 .network-column { width: auto; }
 .bssid-column { width: 158px; }
 .signal-column { width: 150px; }
+.band-column { width: 86px; }
+.channel-column { width: 78px; }
+.width-column { width: 136px; }
 .frequency-column { width: 110px; }
 .link-column { width: 100px; }
 .freshness-column { width: 94px; }

@@ -45,6 +45,7 @@ def normalize_ap(properties, active, now_ms, scan_started_ms=None):
         freshness = "fresh"
     else:
         freshness = "unknown"
+    width = int(properties.get("Bandwidth", 0))
     return {
         "ssid": raw_ssid.decode("utf-8", errors="replace"),
         "ssid_bytes_base64": base64.b64encode(raw_ssid).decode("ascii"),
@@ -53,7 +54,9 @@ def normalize_ap(properties, active, now_ms, scan_started_ms=None):
         "rssi_dbm": None,
         "noise_dbm": None,
         "frequency_mhz": int(properties["Frequency"]) or None,
-        "channel_width_mhz": None,
+        # NetworkManager 1.46+ exposes the AP's advertised operating bandwidth.
+        # Older daemons omit it; zero means unknown rather than a 20 MHz default.
+        "channel_width_mhz": width if width > 0 else None,
         "connected": bool(active) if valid_bssid(str(properties.get("HwAddress", ""))) else None,
         "last_seen_age_ms": age,
         "freshness": freshness,
@@ -152,7 +155,7 @@ class NetworkManager:
 
 BACKEND = {"platform": "linux", "name": "networkmanager-dbus", "backend_version": "0.1.0"}
 CAPABILITIES = {"strength_percent": True, "rssi_dbm": False, "noise_dbm": False,
-                "channel_width_mhz": False, "last_seen_resolution_ms": 1000}
+                "channel_width_mhz": True, "last_seen_resolution_ms": 1000}
 
 
 def valid_bssid(text):

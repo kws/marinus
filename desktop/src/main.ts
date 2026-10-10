@@ -1,5 +1,6 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { decodeInterfaces, decodeScan, signalFraction, signalLabel, type InterfaceList, type ScanResult } from './protocol';
+import { advertisedWidth, radioChannel } from './radio';
 import demoCapture from '../../contracts/draft/fixtures/macos-completed.json';
 import './style.css';
 
@@ -29,8 +30,8 @@ app.innerHTML = `
     </div>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Nearby networks">
       <table aria-label="Access point observations">
-        <colgroup><col class="network-column"><col class="bssid-column"><col class="signal-column"><col class="frequency-column"><col class="link-column"><col class="freshness-column"></colgroup>
-        <thead><tr><th scope="col">Network</th><th scope="col">BSSID</th><th scope="col">Signal</th><th scope="col">Frequency</th><th scope="col">Link</th><th scope="col">Freshness</th></tr></thead>
+        <colgroup><col class="network-column"><col class="bssid-column"><col class="signal-column"><col class="band-column"><col class="channel-column"><col class="width-column"><col class="frequency-column"><col class="link-column"><col class="freshness-column"></colgroup>
+        <thead><tr><th scope="col">Network</th><th scope="col">BSSID</th><th scope="col">Signal</th><th scope="col">Band</th><th scope="col" title="Primary channel">Channel</th><th scope="col" title="Operating width advertised by the access point">Advertised width</th><th scope="col">Frequency</th><th scope="col">Link</th><th scope="col">Freshness</th></tr></thead>
         <tbody id="networks"></tbody>
       </table>
       <div id="empty" class="empty">Select an interface, then click Scan.</div>
@@ -111,9 +112,13 @@ function render() {
     const signal = document.createElement('td'); const measurement = document.createElement('div'); measurement.className = 'signal'; const label = document.createElement('span'); label.textContent = signalLabel(row);
     const bar = document.createElement('span'); bar.className = 'signal-bar'; bar.setAttribute('aria-hidden', 'true'); const fill = document.createElement('i'); fill.style.width = `${(signalFraction(row) ?? 0) * 100}%`; bar.append(fill); measurement.append(bar, label); signal.append(measurement);
     const frequency = document.createElement('td'); frequency.textContent = row.frequency_mhz === null ? 'Unknown' : `${row.frequency_mhz} MHz`;
+    const radio = radioChannel(row.frequency_mhz);
+    const band = document.createElement('td'); band.textContent = radio.band;
+    const channel = document.createElement('td'); channel.textContent = radio.channel; channel.title = 'Primary channel';
+    const width = document.createElement('td'); width.textContent = advertisedWidth(row);
     const link = document.createElement('td'); link.textContent = row.connected === null ? 'Unknown' : row.connected ? 'Connected' : '—';
     const freshness = document.createElement('td'); freshness.className = `freshness ${row.freshness}`; freshness.textContent = row.freshness;
-    tr.append(name, bssid, signal, frequency, link, freshness); body.append(tr);
+    tr.append(name, bssid, signal, band, channel, width, frequency, link, freshness); body.append(tr);
   }
   const empty = element('empty'); empty.hidden = visible.length > 0;
   empty.textContent = busy ? 'Working…' : result ? result.scan.status === 'failed' ? 'Scan failed. See the status bar for details.' : filter ? 'No matching networks.' : 'No access points returned.' : 'Select an interface, then click Scan.';

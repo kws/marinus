@@ -71,8 +71,16 @@ on its first failed scan after writing that failure record.
   it is never converted to dBm or normalized against the strongest AP.
 - Each BSSID remains a separate observation. Raw SSID bytes are preserved in
   base64 alongside UTF-8 display text; an empty SSID is known hidden/empty.
-- Native center frequency is converted from kHz to MHz. Noise, channel width
-  and driver identity are currently unknown (`null`) and are not invented.
+- Native channel frequency is converted from kHz to MHz. Noise and driver
+  identity are currently unknown (`null`) and are not invented.
+- Advertised operating width is decoded from the BSSID's HT/VHT/HE/EHT operation
+  elements, including 6 GHz HE and 320 MHz EHT operation when supplied by the
+  driver. PHY capability elements are not used to guess the operating width.
+  Missing, malformed or unrecognized data stays `null` without discarding the
+  BSSID's other measurements. Non-contiguous 80+80 MHz operation stays unknown
+  because the draft contract has no way to distinguish it from contiguous
+  160 MHz. The parser reports the nominal EHT width, including when a disabled
+  subchannel bitmap is present; it does not report puncturing or channel spans.
 - Connection identity uses an optional current-connection query. If Windows
   cannot provide it, `connected` is `null` for every observation.
 - The host receive timestamp is FILETIME (100-nanosecond units since 1601).
@@ -84,6 +92,11 @@ on its first failed scan after writing that failure record.
 
 These fields describe the driver's observations; scan completion does not
 guarantee every entry is new. See [Microsoft's BSS structure reference](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/ns-wlanapi-wlan_bss_entry).
+
+Width parsing is covered by synthetic operation elements and native-buffer
+bounds/offset tests. Live Intel AX201 scans also verified 20, 40, 80 and 160 MHz
+width collection; 6 GHz HE and 320 MHz EHT parsing still have synthetic coverage
+only. See the hardware checks below.
 
 ## Library
 
@@ -129,6 +142,24 @@ readings. Across 31 fresh matched readings, the median Windows-minus-Mac RSSI
 difference was 1 dB, while individual networks varied. These checks establish
 collection feasibility on the tested hardware, rather than calibration between
 adapters. Identifying scan captures remain outside the repository.
+
+On 2026-10-10, the current width collector was built and tested in a separate
+directory on `bb-108`, running Windows 11 build 26200 with an Intel AX201 and
+.NET SDK 10.0.401. All 29 synthetic backend tests passed, and the Release build
+completed without warnings or errors. A cached read returned 12 BSSIDs; two
+fresh scans returned 21 and 23 BSSIDs, respectively, across 2.4 GHz and 5 GHz.
+Both fresh scans collected advertised widths of 20, 40, 80 and 160 MHz. They
+retained 18/17 fresh observations and 3/6 cached observations, respectively.
+
+The second fresh scan ran in the active desktop session with an unelevated user
+token and completed successfully. All four live interface/scan envelopes and
+seven generated fixtures passed the shared validator. The desktop decoder and
+radio helpers accepted each capture and displayed the expected band, primary
+channel and advertised width for each BSSID. The temporary desktop test task
+was removed; the installed GUI and main checkout were not modified. Private
+captures and test sources remain outside the repository. No 6 GHz observations
+were available on this adapter, so 6 GHz HE and 320 MHz EHT width collection
+still need an appropriate hardware check.
 
 Further live checks include consent denial, multiple adapters, radio-off
 behavior, additional drivers and a real walk-around survey. JSON captures can be validated with

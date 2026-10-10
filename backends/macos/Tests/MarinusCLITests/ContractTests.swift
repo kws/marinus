@@ -25,6 +25,9 @@ final class ContractTests {
             ContractNetwork(ssid: "", ssidData: Data(), bssid: nil, rssi: 0, noise: 0, channel: nil, band: "unknown", width: nil),
         ]
         let rows = raw.map { contractObservation($0, currentBSSID: "02:00:00:00:00:02") }
+        try expectEqual(rows[0]["channel_width_mhz"] as? Int, 20)
+        try expectEqual(rows[1]["channel_width_mhz"] as? Int, 80)
+        try expectTrue(rows[2]["channel_width_mhz"] is NSNull)
         let completed = scanEnvelope(interface: "synthetic0", started: contractTimestamp(), status: "completed", observations: rows)
         let result = executeCommand(CLICommand(kind: .scan, asJSON: true), version: "test", surveyScan: { _ in completed })
         let value = try expectUnwrap(JSONSerialization.jsonObject(with: Data(result.stdout.utf8)) as? [String: Any])

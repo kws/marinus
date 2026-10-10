@@ -45,8 +45,12 @@ PolicyKit or install software.
   normalized against the strongest AP in each scan.
 - Every BSSID is retained, including shared and hidden/unknown SSIDs. Raw SSID
   bytes are preserved as Base64.
-- Unsupported dBm/noise/width measurements are `null`; no dBm is invented from
+- Unsupported dBm/noise measurements are `null`; no dBm is invented from
   a percentage.
+- `channel_width_mhz` reads the AP's advertised `Bandwidth` property on
+  NetworkManager 1.46+. Older daemons omit the property, and zero/unavailable
+  bandwidth stays `null`. The implementation supports reading width, so its
+  capability is true even when the daemon or an individual AP supplies no value.
 - Age uses Linux CLOCK_BOOTTIME. NetworkManager's `LastSeen` has one-second
   resolution even though the calculated age is expressed in milliseconds.
 - A fresh request waits for `LastScan` to advance beyond the previous completion
@@ -56,6 +60,30 @@ PolicyKit or install software.
   not become new survey measurements.
 - `--cached` is explicit. Failed fresh requests return structured errors and
   exit 1 rather than silently falling back to cached data.
+
+## Live band/channel/width check
+
+On 10 October 2026, the updated collector completed fresh scans on the `pop-os`
+host with NetworkManager 1.36.6, Python 3.10.12 and kernel
+6.12.10-76061203-generic:
+
+| Driver | Fresh BSSIDs | Desktop band and primary channel | Approximate scan duration |
+| --- | --- | --- | --- |
+| `b43` | 2 | 2.4 GHz: 1, 6 | 1 second |
+| `rtw_8821cu` | 5 | 2.4 GHz: 12; 5 GHz: 36 | 12 seconds |
+
+Both captures passed the shared contract validator and the desktop decoder and
+radio display helpers. All observations were fresh, retained their native signal
+percentages and displayed advertised width as `Unknown`. A direct inspection of
+the AP D-Bus properties confirmed that this daemon exposed no `Bandwidth`
+property. This verifies the fallback on real hardware; reporting a known width
+through NetworkManager still needs a live check with version 1.46+.
+
+Cached reads worked without elevation. An unprivileged fresh scan returned the
+expected structured `permission_denied` error over SSH; fresh scans then used
+the existing `--scan-with-sudo` diagnostic path. No policy changes or software
+installations were needed. Identifying network captures were kept outside the
+repository.
 
 ## Earlier feasibility checks
 
